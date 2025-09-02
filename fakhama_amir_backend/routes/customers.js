@@ -59,6 +59,42 @@ router.get('/',
     }
   }
 );
+// GET /api/map - عرض جميع العملاء (للمشرفين فقط)
+router.get('/map', 
+ verifyToken,
+ checkUserType(['user']),
+ async (req, res) => {
+   try {
+     const query = `
+       SELECT 
+         id, full_name, phone, latitude, longitude
+       FROM customers
+       ORDER BY created_at DESC
+     `;
+     
+     const result = await executeQuery(query);
+     
+     if (!result.success) {
+       return res.status(500).json({
+         success: false,
+         message: 'خطأ في استرداد بيانات العملاء'
+       });
+     }
+     
+     res.json({
+       success: true,
+       message: 'تم استرداد بيانات العملاء بنجاح',
+       data: result.data
+     });
+   } catch (error) {
+     res.status(500).json({
+       success: false,
+       message: 'خطأ في الخادم',
+       error: error.message
+     });
+   }
+ }
+);
 
 // GET /api/customers/:id - عرض عميل واحد
 router.get('/:id',

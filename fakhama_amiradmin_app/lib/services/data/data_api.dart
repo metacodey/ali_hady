@@ -46,6 +46,14 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 
+  getDataMap() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.mapCustomer,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
   addCustomer(Map<String, dynamic> data) async {
     var res = await apiReq.sendJsonData(
       headers: _headerWithToken() ?? {},
@@ -111,10 +119,10 @@ class DataApi {
         .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
         .join('&');
 
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.productsList}?$queryString",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.productsList}?$queryString",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -156,7 +164,7 @@ class DataApi {
   }
 
   editProduct(int productId, Map<String, dynamic> data) async {
-    var res = await apiReq.sendJsonData(
+    var res = await apiReq.updateJsonData(
       headers: _headerWithToken() ?? {},
       url: "${ApiServices.editProduct}$productId",
       data: data,
@@ -165,10 +173,10 @@ class DataApi {
   }
 
   deleteProduct(int productId) async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.deleteProduct}$productId",
-        method: "DELETE");
+    var res = await apiReq.deleteData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.deleteProduct}$productId",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -232,10 +240,18 @@ class DataApi {
         .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
         .join('&');
 
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.ordersList}?$queryString",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.ordersList}?$queryString",
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  getStatus() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.statusOrders,
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -283,10 +299,10 @@ class DataApi {
   }
 
   deleteOrder(int orderId) async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.deleteOrder}$orderId",
-        method: "DELETE");
+    var res = await apiReq.deleteData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.deleteOrder}$orderId",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 

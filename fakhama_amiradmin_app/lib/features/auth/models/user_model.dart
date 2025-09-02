@@ -18,8 +18,8 @@ class UserModel {
 
   UserModel(
       {this.id,
-      required this.username,
-      required this.email,
+      this.username = "",
+      this.email = "",
       required this.fullName,
       required this.phone,
       this.city,

@@ -110,8 +110,8 @@ street_address: Joi.string().min(5).max(500).allow('').optional()
   update: Joi.object({
     full_name: Joi.string().min(2).max(100).optional(),
     phone: Joi.string().pattern(/^\+964[0-9]{9}$/).optional(),
- city: Joi.string().min(2).max(50).optional().allow(null, ''),
-street_address: Joi.string().min(5).max(500).optional().allow(null, ''),
+    city: Joi.string().min(2).max(50).optional().allow(null, ''),
+    street_address: Joi.string().min(5).max(500).optional().allow(null, ''),
     country: Joi.string().max(50).optional(),
     latitude: Joi.number().min(-90).max(90).optional(),
     longitude: Joi.number().min(-180).max(180).optional()
@@ -138,7 +138,7 @@ const productSchemas = {
       .messages({
         'any.required': 'اسم المنتج مطلوب'
       }),
-    description: Joi.string().max(2000).optional(),
+    description: Joi.string().max(2000).optional().allow(null, ''),
     sku: Joi.string().max(50).optional(),
     price: Joi.number().positive().precision(2).required()
       .messages({
@@ -152,7 +152,7 @@ const productSchemas = {
   update: Joi.object({
     category_id: Joi.number().integer().positive().optional(),
     name: Joi.string().min(2).max(200).optional(),
-    description: Joi.string().max(2000).optional(),
+    description: Joi.string().max(2000).optional().allow(null, ''),
     sku: Joi.string().max(50).optional(),
     price: Joi.number().positive().precision(2).optional(),
     quantity: Joi.number().integer().min(0).optional(),

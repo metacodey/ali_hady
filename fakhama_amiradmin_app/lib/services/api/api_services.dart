@@ -17,6 +17,7 @@ class ApiServices {
   // Customer endpoints
   static String customersList = "${server}customers";
   static String showCustomer = "${server}customers/";
+  static String mapCustomer = "${server}customers/map";
   static String addCustomer = "${server}customers";
   static String editCustomer = "${server}customers/";
   static String deleteCustomer = "${server}customers/";
@@ -42,6 +43,7 @@ class ApiServices {
   static String updateOrderStatus = "${server}orders/";
   static String deleteOrder = "${server}orders/";
   static String ordersStats = "${server}orders/dashboard/stats";
+  static String statusOrders = "${server}products/status";
 
   // Payment endpoints
   static String paymentsList = "${server}payments";

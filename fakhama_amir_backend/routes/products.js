@@ -64,6 +64,74 @@ router.get('/',
     }
   }
 );
+// GET /api/products - عرض جميع المنتجات
+
+// GET /api/products/categories - عرض فئات المنتجات
+router.get('/all',
+  async (req, res) => {
+    try {
+      const query = `
+         SELECT 
+        p.id, p.name, p.description, p.sku, p.price, p.quantity,
+        p.image, p.is_active, p.created_at,
+        pc.name as category_name
+      FROM products p
+      LEFT JOIN product_categories pc ON p.category_id = pc.id
+      WHERE p.is_active = 1
+      ORDER BY p.created_at DESC
+      `;
+      
+      const result = await executeQuery(query);
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في المنتجات'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد المنتجات بنجاح',
+        data: result.data
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+router.get('/status',
+  async (req, res) => {
+    try {
+      const query = "SELECT * FROM `order_statuses`;";
+      const result = await executeQuery(query);
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في الحالات'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد المنتجات بنجاح',
+        data: result.data
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
 
 // GET /api/products/admin - عرض جميع المنتجات للإدارة
 router.get('/admin',

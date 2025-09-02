@@ -19,12 +19,12 @@ class BasicInfoCard extends GetView<AddEditClientController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card Title
+            // Card Title - لون معلومات العميل (أزرق)
             Row(
               children: [
                 Icon(
                   Icons.person_outline,
-                  color: Colors.blue,
+                  color: Colors.blue[700], // أزرق للمعلومات الشخصية
                   size: 24.sp,
                 ),
                 SizedBox(width: 8.w),
@@ -41,12 +41,13 @@ class BasicInfoCard extends GetView<AddEditClientController> {
 
             SizedBox(height: 16.h),
 
-            // Full Name Field
+            // Full Name Field - لون للاسم (أرجواني للهوية الشخصية)
             CustomTextField(
               controller: controller.fullNameController,
               label: 'الاسم الكامل',
               hintText: 'أدخل الاسم الكامل',
-              prefixIcon: const Icon(Icons.person),
+              prefixIcon: Icon(Icons.person,
+                  color: Colors.purple[600]), // أرجواني للهوية
               validator: controller.validateFullName,
               radius: BorderRadius.circular(10.r),
               fillColor: Get.theme.canvasColor,
@@ -58,13 +59,15 @@ class BasicInfoCard extends GetView<AddEditClientController> {
             ),
 
             SizedBox(height: 16.h),
+
             if (!controller.isEditMode.value) ...[
-              // Email Field
+              // Email Field - لون للإيميل (أحمر/برتقالي للاتصالات)
               CustomTextField(
                 controller: controller.emailController,
                 label: 'البريد الإلكتروني',
                 hintText: 'أدخل البريد الإلكتروني',
-                prefixIcon: Icon(Icons.email_outlined),
+                prefixIcon: Icon(Icons.email_outlined,
+                    color: Colors.red[600]), // أحمر للإيميل
                 keyboardType: TextInputType.emailAddress,
                 validator: controller.validateEmail,
                 radius: BorderRadius.circular(10.r),
@@ -78,7 +81,7 @@ class BasicInfoCard extends GetView<AddEditClientController> {
 
               SizedBox(height: 16.h),
 
-              // Password Field
+              // Password Field - لون للأمان (أحمر/برتقالي للأمان)
               Obx(() => CustomTextField(
                     controller: controller.passwordController,
                     label: controller.isEditMode.value
@@ -87,13 +90,15 @@ class BasicInfoCard extends GetView<AddEditClientController> {
                     hintText: controller.isEditMode.value
                         ? 'اتركه فارغاً للاحتفاظ بكلمة المرور الحالية'
                         : 'أدخل كلمة المرور',
-                    prefixIcon: Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline,
+                        color: Colors.orange[600]), // برتقالي للأمان
                     obscureText: !controller.isPasswordVisible.value,
                     suffixIcon: IconButton(
                       icon: Icon(
                         controller.isPasswordVisible.value
                             ? Icons.visibility_off
                             : Icons.visibility,
+                        color: Colors.grey[600], // رمادي لأيقونة الرؤية
                       ),
                       onPressed: controller.togglePasswordVisibility,
                     ),
@@ -109,12 +114,14 @@ class BasicInfoCard extends GetView<AddEditClientController> {
 
               SizedBox(height: 16.h),
             ],
-            // Phone Field
+
+            // Phone Field - لون للهاتف (أخضر للاتصالات)
             CustomTextField(
               controller: controller.phoneController,
               label: 'رقم الهاتف',
               hintText: 'أدخل رقم الهاتف',
-              prefixIcon: Icon(Icons.phone_outlined),
+              prefixIcon: Icon(Icons.phone_outlined,
+                  color: Colors.green[600]), // أخضر للهاتف
               keyboardType: TextInputType.phone,
               validator: controller.validatePhone,
               isNext: true,

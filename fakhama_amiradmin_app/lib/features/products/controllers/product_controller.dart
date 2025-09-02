@@ -1,4 +1,4 @@
-import 'package:fakhama_amiradmin_app/features/auth/models/user_model.dart';
+import 'package:fakhama_amiradmin_app/features/products/models/products_model.dart';
 import 'package:fakhama_amiradmin_app/services/helper_function.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
@@ -7,7 +7,7 @@ import '../../../core/class/statusrequest.dart';
 import '../../../core/constants/utils/widgets/snak_bar.dart';
 import '../../../services/data/data_api.dart';
 
-class ClientsController extends GetxController {
+class ProductController extends GetxController {
   // حالة الطلب
   Rx<StatusRequest> statusRequest = StatusRequest.none.obs;
   Rx<StatusRequest> statusLoadMore = StatusRequest.none.obs;
@@ -22,7 +22,7 @@ class ClientsController extends GetxController {
 
   RxBool hasMoreData = true.obs;
   RxBool isLoadingMore = false.obs;
-  RxList<UserModel> clients = RxList<UserModel>([]);
+  RxList<ProductModel> products = RxList<ProductModel>([]);
 
   // متغيرات البحث والفلترة
   final TextEditingController searchController = TextEditingController();
@@ -30,10 +30,10 @@ class ClientsController extends GetxController {
   RxString searchQuery = ''.obs;
   Rx<String?> selectedStatus = Rx<String?>(null);
   RxList<String> uniqueStatuses =
-      <String>['جميع الحالات', 'نشط', 'غير نشط', 'محظور'].obs;
+      <String>['جميع الحالات', 'نشط', 'غير نشط'].obs;
 
-  // قائمة العملاء المفلترة
-  RxList<UserModel> filteredClients = RxList<UserModel>([]);
+  // قائمة المنتجات المفلترة
+  RxList<ProductModel> filteredProducts = RxList<ProductModel>([]);
 
   // دالة تعيين استعلام البحث
   void setSearchQuery(String query) {
@@ -57,35 +57,35 @@ class ClientsController extends GetxController {
 
   // دالة تطبيق الفلاتر
   void _applyFilters() {
-    List<UserModel> filtered = clients.toList();
+    List<ProductModel> filtered = products.toList();
 
     // تطبيق فلتر البحث
     if (searchQuery.value.isNotEmpty) {
-      filtered = filtered.where((client) {
+      filtered = filtered.where((product) {
         final query = searchQuery.value.toLowerCase();
-        return (client.fullName.toLowerCase().contains(query)) ||
-            (client.email.toLowerCase().contains(query)) ||
-            (client.phone.toLowerCase().contains(query));
+        return (product.name.toLowerCase().contains(query)) ||
+            (product.sku.toLowerCase().contains(query)) ||
+            (product.description?.toLowerCase().contains(query) ?? false) ||
+            (product.categoryName?.toLowerCase().contains(query) ?? false);
       }).toList();
     }
 
     // تطبيق فلتر الحالة
     if (selectedStatus.value != null &&
         selectedStatus.value != 'جميع الحالات') {
-      filtered = filtered.where((client) {
+      filtered = filtered.where((product) {
         switch (selectedStatus.value) {
           case 'نشط':
-            return client.isActive == true;
+            return product.isActive == true;
           case 'غير نشط':
-            return client.isActive == false;
-
+            return product.isActive == false;
           default:
             return true;
         }
       }).toList();
     }
 
-    filteredClients.value = filtered;
+    filteredProducts.value = filtered;
   }
 
   Future<void> fetchData(
@@ -96,33 +96,31 @@ class ClientsController extends GetxController {
     if (isRefresh) {
       currentPage.value = 1;
       hasMoreData.value = true;
-      clients.clear();
+      products.clear();
     }
 
     await handleRequestfunc(
       hideLoading: true,
       status: hideLoading ? null : (status) => statusRequest.value = status,
-      apiCall: () async => await dataApi.getCustomersList(page: page),
+      apiCall: () async => await dataApi.getProductsList(page: page),
       onSuccess: (res) {
         var data = res['data'] as List?;
-
         if (data != null) {
-          List<UserModel> newClients =
-              data.map((e) => UserModel.fromJson(e)).toList();
+          List<ProductModel> newProducts =
+              data.map((e) => ProductModel.fromJson(e)).toList();
 
           if (page == 1 || isRefresh) {
-            clients.value = newClients;
+            products.value = newProducts;
           } else {
-            clients.addAll(newClients);
+            products.addAll(newProducts);
           }
         }
-
         // تحديث معلومات التصفح
         currentPage.value = res['pagination']['currentPage'] ?? 1;
         totalItems.value = res['pagination']['totalItems'] ?? 10;
         totalPages.value = res['pagination']['totalPages'] ?? 0;
 
-        // التحقق من وجود المزيد من البيانات - إصلاح الحساب
+        // التحقق من وجود المزيد من البيانات
         hasMoreData.value = currentPage.value < totalPages.value;
 
         // تطبيق الفلاتر على البيانات الجديدة
@@ -141,17 +139,17 @@ class ClientsController extends GetxController {
         hideLoading: true,
         status: (status) => statusLoadMore.value = status,
         apiCall: () async =>
-            await dataApi.getCustomersList(page: currentPage.value + 1),
+            await dataApi.getProductsList(page: currentPage.value + 1),
         onSuccess: (res) {
           var data = res['data'] as List?;
           if (data != null) {
-            List<UserModel> newClients = data
+            List<ProductModel> newProducts = data
                 .map(
-                  (e) => UserModel.fromJson(e),
+                  (e) => ProductModel.fromJson(e),
                 )
                 .toList();
 
-            clients.addAll(newClients);
+            products.addAll(newProducts);
           }
           // تحديث معلومات التصفح
           currentPage.value = res['pagination']['currentPage'] ?? 1;
@@ -173,23 +171,23 @@ class ClientsController extends GetxController {
     }
   }
 
-  Future<void> deleteClient(int id) async {
+  Future<void> deleteProduct(int id) async {
     await handleRequestfunc(
       apiCall: () async {
-        return await dataApi.deleteCustomer(id);
+        return await dataApi.deleteProduct(id);
       },
       onSuccess: (res) {
         fetchData(hideLoading: true);
         showSnakBar(
             title: 'success'.tr,
-            msg: 'تم حذف عميل بنجاح'.tr,
+            msg: 'تم حذف المنتج بنجاح'.tr,
             color: Colors.green);
       },
       onError: showError,
     );
   }
 
-// مستمع التمرير للتحميل التلقائي
+  // مستمع التمرير للتحميل التلقائي
   void _scrollListener() {
     if (scroller.position.pixels >= scroller.position.maxScrollExtent * 0.8) {
       loadMoreData();
@@ -200,7 +198,6 @@ class ClientsController extends GetxController {
   void onInit() {
     super.onInit();
     scroller.addListener(_scrollListener);
-
     fetchData();
   }
 

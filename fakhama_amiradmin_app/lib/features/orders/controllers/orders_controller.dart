@@ -1,4 +1,5 @@
-import 'package:fakhama_amiradmin_app/features/auth/models/user_model.dart';
+import 'package:fakhama_amiradmin_app/features/orders/models/order_model.dart';
+import 'package:fakhama_amiradmin_app/features/orders/models/status_model.dart';
 import 'package:fakhama_amiradmin_app/services/helper_function.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
@@ -7,7 +8,7 @@ import '../../../core/class/statusrequest.dart';
 import '../../../core/constants/utils/widgets/snak_bar.dart';
 import '../../../services/data/data_api.dart';
 
-class ClientsController extends GetxController {
+class OrdersController extends GetxController {
   // حالة الطلب
   Rx<StatusRequest> statusRequest = StatusRequest.none.obs;
   Rx<StatusRequest> statusLoadMore = StatusRequest.none.obs;
@@ -22,18 +23,17 @@ class ClientsController extends GetxController {
 
   RxBool hasMoreData = true.obs;
   RxBool isLoadingMore = false.obs;
-  RxList<UserModel> clients = RxList<UserModel>([]);
+  RxList<OrderModel> orders = RxList<OrderModel>([]);
+  RxList<StatusModel> statusOrder = RxList<StatusModel>([]);
 
   // متغيرات البحث والفلترة
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
   RxString searchQuery = ''.obs;
-  Rx<String?> selectedStatus = Rx<String?>(null);
-  RxList<String> uniqueStatuses =
-      <String>['جميع الحالات', 'نشط', 'غير نشط', 'محظور'].obs;
+  Rx<StatusModel?> selectedStatus = Rx<StatusModel?>(null);
 
-  // قائمة العملاء المفلترة
-  RxList<UserModel> filteredClients = RxList<UserModel>([]);
+  // قائمة الطلبات المفلترة
+  RxList<OrderModel> filteredOrders = RxList<OrderModel>([]);
 
   // دالة تعيين استعلام البحث
   void setSearchQuery(String query) {
@@ -42,8 +42,8 @@ class ClientsController extends GetxController {
   }
 
   // دالة تعيين الحالة المحددة
-  void setStatus(String? status) {
-    selectedStatus.value = status ?? '';
+  void setStatus(StatusModel? status) {
+    selectedStatus.value = status;
     _applyFilters();
   }
 
@@ -57,35 +57,27 @@ class ClientsController extends GetxController {
 
   // دالة تطبيق الفلاتر
   void _applyFilters() {
-    List<UserModel> filtered = clients.toList();
+    List<OrderModel> filtered = orders.toList();
 
     // تطبيق فلتر البحث
     if (searchQuery.value.isNotEmpty) {
-      filtered = filtered.where((client) {
+      filtered = filtered.where((order) {
         final query = searchQuery.value.toLowerCase();
-        return (client.fullName.toLowerCase().contains(query)) ||
-            (client.email.toLowerCase().contains(query)) ||
-            (client.phone.toLowerCase().contains(query));
+        return (order.orderNumber.toLowerCase().contains(query)) ||
+            (order.customerName.toLowerCase().contains(query)) ||
+            (order.customerPhone.toLowerCase().contains(query));
       }).toList();
     }
 
     // تطبيق فلتر الحالة
     if (selectedStatus.value != null &&
         selectedStatus.value != 'جميع الحالات') {
-      filtered = filtered.where((client) {
-        switch (selectedStatus.value) {
-          case 'نشط':
-            return client.isActive == true;
-          case 'غير نشط':
-            return client.isActive == false;
-
-          default:
-            return true;
-        }
+      filtered = filtered.where((order) {
+        return order.status == selectedStatus.value;
       }).toList();
     }
 
-    filteredClients.value = filtered;
+    filteredOrders.value = filtered;
   }
 
   Future<void> fetchData(
@@ -96,33 +88,31 @@ class ClientsController extends GetxController {
     if (isRefresh) {
       currentPage.value = 1;
       hasMoreData.value = true;
-      clients.clear();
+      orders.clear();
     }
 
     await handleRequestfunc(
       hideLoading: true,
       status: hideLoading ? null : (status) => statusRequest.value = status,
-      apiCall: () async => await dataApi.getCustomersList(page: page),
+      apiCall: () async => await dataApi.getOrdersList(page: page),
       onSuccess: (res) {
         var data = res['data'] as List?;
-
         if (data != null) {
-          List<UserModel> newClients =
-              data.map((e) => UserModel.fromJson(e)).toList();
+          List<OrderModel> newOrders =
+              data.map((e) => OrderModel.fromJson(e)).toList();
 
           if (page == 1 || isRefresh) {
-            clients.value = newClients;
+            orders.value = newOrders;
           } else {
-            clients.addAll(newClients);
+            orders.addAll(newOrders);
           }
         }
-
         // تحديث معلومات التصفح
         currentPage.value = res['pagination']['currentPage'] ?? 1;
         totalItems.value = res['pagination']['totalItems'] ?? 10;
         totalPages.value = res['pagination']['totalPages'] ?? 0;
 
-        // التحقق من وجود المزيد من البيانات - إصلاح الحساب
+        // التحقق من وجود المزيد من البيانات
         hasMoreData.value = currentPage.value < totalPages.value;
 
         // تطبيق الفلاتر على البيانات الجديدة
@@ -141,17 +131,17 @@ class ClientsController extends GetxController {
         hideLoading: true,
         status: (status) => statusLoadMore.value = status,
         apiCall: () async =>
-            await dataApi.getCustomersList(page: currentPage.value + 1),
+            await dataApi.getOrdersList(page: currentPage.value + 1),
         onSuccess: (res) {
           var data = res['data'] as List?;
           if (data != null) {
-            List<UserModel> newClients = data
+            List<OrderModel> newOrders = data
                 .map(
-                  (e) => UserModel.fromJson(e),
+                  (e) => OrderModel.fromJson(e),
                 )
                 .toList();
 
-            clients.addAll(newClients);
+            orders.addAll(newOrders);
           }
           // تحديث معلومات التصفح
           currentPage.value = res['pagination']['currentPage'] ?? 1;
@@ -173,23 +163,58 @@ class ClientsController extends GetxController {
     }
   }
 
-  Future<void> deleteClient(int id) async {
+  Future<void> fetachStatus() async {
     await handleRequestfunc(
       apiCall: () async {
-        return await dataApi.deleteCustomer(id);
+        return await dataApi.getStatus();
+      },
+      onSuccess: (res) {
+        var data = res['data'] as List?;
+        if (data != null) {
+          statusOrder.assignAll(data.map(
+            (e) => StatusModel.fromJson(e),
+          ));
+        }
+      },
+      onError: showError,
+    );
+  }
+
+  Future<void> deleteOrder(int id) async {
+    await handleRequestfunc(
+      apiCall: () async {
+        return await dataApi.deleteOrder(id);
       },
       onSuccess: (res) {
         fetchData(hideLoading: true);
         showSnakBar(
             title: 'success'.tr,
-            msg: 'تم حذف عميل بنجاح'.tr,
+            msg: 'تم حذف الطلب بنجاح'.tr,
             color: Colors.green);
       },
       onError: showError,
     );
   }
 
-// مستمع التمرير للتحميل التلقائي
+  Future<void> updateOrderStatus(int orderId, StatusModel newStatus,
+      {String note = ""}) async {
+    await handleRequestfunc(
+      apiCall: () async {
+        return await dataApi.updateOrderStatus(
+            orderId, {"status_id": newStatus.id, 'note': note});
+      },
+      onSuccess: (res) {
+        fetchData(hideLoading: true);
+        showSnakBar(
+            title: 'success'.tr,
+            msg: 'تم تحديث حالة الطلب بنجاح'.tr,
+            color: Colors.green);
+      },
+      onError: showError,
+    );
+  }
+
+  // مستمع التمرير للتحميل التلقائي
   void _scrollListener() {
     if (scroller.position.pixels >= scroller.position.maxScrollExtent * 0.8) {
       loadMoreData();
@@ -200,8 +225,8 @@ class ClientsController extends GetxController {
   void onInit() {
     super.onInit();
     scroller.addListener(_scrollListener);
-
     fetchData();
+    fetachStatus();
   }
 
   @override

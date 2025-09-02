@@ -19,12 +19,12 @@ class LocationInfoCard extends GetView<AddEditClientController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card Title
+            // Card Title - لون الموقع (برتقالي/أحمر)
             Row(
               children: [
                 Icon(
                   Icons.location_on_outlined,
-                  color: Colors.orange,
+                  color: Colors.orange[700], // برتقالي للموقع
                   size: 24.sp,
                 ),
                 SizedBox(width: 8.w),
@@ -40,13 +40,15 @@ class LocationInfoCard extends GetView<AddEditClientController> {
             ),
 
             SizedBox(height: 16.h),
+
             if (!controller.isEditMode.value) ...[
-              // Country Field
+              // Country Field - لون العلم (أخضر للدولة)
               CustomTextField(
                 controller: controller.countryController,
                 label: 'الدولة',
                 hintText: 'أدخل اسم الدولة',
-                prefixIcon: Icon(Icons.flag_outlined),
+                prefixIcon: Icon(Icons.flag_outlined,
+                    color: Colors.green[600]), // أخضر للدولة
                 validator: (value) =>
                     controller.validateRequired(value, 'الدولة'),
                 isNext: true,
@@ -61,12 +63,13 @@ class LocationInfoCard extends GetView<AddEditClientController> {
               SizedBox(height: 16.h),
             ],
 
-            // City Field
+            // City Field - لون المدينة (أزرق للمدينة)
             CustomTextField(
               controller: controller.cityController,
               label: 'المدينة',
               hintText: 'أدخل اسم المدينة',
-              prefixIcon: Icon(Icons.location_city_outlined),
+              prefixIcon: Icon(Icons.location_city_outlined,
+                  color: Colors.blue[600]), // أزرق للمدينة
               isNext: true,
               radius: BorderRadius.circular(10.r),
               fillColor: Get.theme.canvasColor,
@@ -78,12 +81,13 @@ class LocationInfoCard extends GetView<AddEditClientController> {
 
             SizedBox(height: 16.h),
 
-            // Street Address Field
+            // Street Address Field - لون العنوان (بني للعنوان)
             CustomTextField(
               controller: controller.streetAddressController,
               label: 'عنوان الشارع',
               hintText: 'أدخل عنوان الشارع',
-              prefixIcon: Icon(Icons.home_outlined),
+              prefixIcon: Icon(Icons.home_outlined,
+                  color: Colors.brown[600]), // بني للعنوان
               maxline: 2,
               isNext: true,
               radius: BorderRadius.circular(10.r),
@@ -95,6 +99,7 @@ class LocationInfoCard extends GetView<AddEditClientController> {
             ),
 
             SizedBox(height: 16.h),
+
             if (!controller.isEditMode.value) ...[
               // Coordinates Section
               Text(
@@ -110,13 +115,14 @@ class LocationInfoCard extends GetView<AddEditClientController> {
 
               Row(
                 children: [
-                  // Latitude Field
+                  // Latitude Field - لون خط العرض (أحمر للاتجاه الشمالي)
                   Expanded(
                     child: CustomTextField(
                       controller: controller.latitudeController,
                       label: 'خط العرض',
                       hintText: '21.5428',
-                      prefixIcon: Icon(Icons.my_location),
+                      prefixIcon: Icon(Icons.my_location,
+                          color: Colors.red[600]), // أحمر لخط العرض
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       validator: controller.validateLatitude,
@@ -132,13 +138,14 @@ class LocationInfoCard extends GetView<AddEditClientController> {
 
                   SizedBox(width: 12.w),
 
-                  // Longitude Field
+                  // Longitude Field - لون خط الطول (أزرق للاتجاه الشرقي)
                   Expanded(
                     child: CustomTextField(
                       controller: controller.longitudeController,
                       label: 'خط الطول',
                       hintText: '39.1728',
-                      prefixIcon: Icon(Icons.place),
+                      prefixIcon: Icon(Icons.place,
+                          color: Colors.blue[600]), // أزرق لخط الطول
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       validator: controller.validateLongitude,

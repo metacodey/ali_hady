@@ -1,7 +1,10 @@
 import 'package:fakhama_amiradmin_app/features/clients/screens/home_clients_screen.dart';
+import 'package:fakhama_amiradmin_app/features/products/screens/home_products_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mc_utils/mc_utils.dart';
+import '../../map/screens/home_map_screen.dart';
+import '../../orders/screens/home_orders_screen.dart';
 import '../model/navigtor_model.dart';
 
 class HomeController extends GetxController {
@@ -14,16 +17,16 @@ class HomeController extends GetxController {
       icon: Icons.people_outline,
     ),
     NavigatorModel(
-      title: 'chat', // الدردشة
-      icon: LucideIcons.messageCircle,
+      title: 'products', // المنتجات
+      icon: LucideIcons.package,
     ),
     NavigatorModel(
       title: 'map', // الخريطة
       icon: LucideIcons.mapPin,
     ),
     NavigatorModel(
-      title: 'products', // المنتجات
-      icon: LucideIcons.package,
+      title: 'orders', // الطلبات
+      icon: LucideIcons.shoppingBag, // أيقونة مشتريات
     ),
     NavigatorModel(
       title: 'payments', // الدفعات
@@ -33,15 +36,9 @@ class HomeController extends GetxController {
 
   List<Widget> screens = [
     const HomeClientsScreen(),
-    Center(
-      child: Text("1"),
-    ),
-    Center(
-      child: Text("2"),
-    ),
-    Center(
-      child: Text("3"),
-    ),
+    const HomeProductsScreen(),
+    const HomeMapScreen(),
+    const HomeOrdersScreen(),
     Center(
       child: Text("4"),
     ),
