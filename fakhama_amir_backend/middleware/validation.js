@@ -62,13 +62,14 @@ const validateQuery = (schema) => {
 // Schemas للعملاء
 const customerSchemas = {
   create: Joi.object({
-    username: Joi.string().alphanum().min(3).max(50).required()
-      .messages({
-        'string.alphanum': 'اسم المستخدم يجب أن يحتوي على أحرف وأرقام فقط',
-        'string.min': 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل',
-        'string.max': 'اسم المستخدم لا يجب أن يتجاوز 50 حرف',
-        'any.required': 'اسم المستخدم مطلوب'
-      }),
+  username: Joi.string().alphanum().min(3).max(50)
+  .default(() => `user${Math.floor(1000 + Math.random() * 9000)}`)
+  .messages({
+    'string.alphanum': 'اسم المستخدم يجب أن يحتوي على أحرف وأرقام فقط',
+    'string.min': 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل',
+    'string.max': 'اسم المستخدم لا يجب أن يتجاوز 50 حرف'
+  }),
+
     email: Joi.string().email().max(100).required()
       .messages({
         'string.email': 'البريد الإلكتروني غير صحيح',
@@ -108,9 +109,9 @@ street_address: Joi.string().min(5).max(500).allow('').optional()
   
   update: Joi.object({
     full_name: Joi.string().min(2).max(100).optional(),
-    phone: Joi.string().pattern(/^\+966[0-9]{9}$/).optional(),
-    city: Joi.string().min(2).max(50).optional(),
-    street_address: Joi.string().min(5).max(500).optional(),
+    phone: Joi.string().pattern(/^\+964[0-9]{9}$/).optional(),
+ city: Joi.string().min(2).max(50).optional().allow(null, ''),
+street_address: Joi.string().min(5).max(500).optional().allow(null, ''),
     country: Joi.string().max(50).optional(),
     latitude: Joi.number().min(-90).max(90).optional(),
     longitude: Joi.number().min(-180).max(180).optional()

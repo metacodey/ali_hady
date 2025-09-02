@@ -75,16 +75,16 @@ class ItemClient extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            client.username,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Colors.grey.shade600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          // SizedBox(height: 2.h),
+                          // Text(
+                          //   client.username,
+                          //   style: TextStyle(
+                          //     fontSize: 12.sp,
+                          //     color: Colors.grey.shade600,
+                          //   ),
+                          //   maxLines: 1,
+                          //   overflow: TextOverflow.ellipsis,
+                          // ),
                         ],
                       ),
                     ),

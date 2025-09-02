@@ -41,68 +41,74 @@ class BasicInfoCard extends GetView<AddEditClientController> {
 
             SizedBox(height: 16.h),
 
-            // Username Field
-            CustomTextField(
-              controller: controller.usernameController,
-              label: 'اسم المستخدم',
-              hintText: 'أدخل اسم المستخدم',
-              prefixIcon: Icon(Icons.account_circle_outlined),
-              validator: controller.validateUsername,
-              isNext: true,
-            ),
-
-            SizedBox(height: 16.h),
-
             // Full Name Field
             CustomTextField(
               controller: controller.fullNameController,
               label: 'الاسم الكامل',
               hintText: 'أدخل الاسم الكامل',
-              prefixIcon: Icon(Icons.person),
+              prefixIcon: const Icon(Icons.person),
               validator: controller.validateFullName,
+              radius: BorderRadius.circular(10.r),
+              fillColor: Get.theme.canvasColor,
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+                width: 1.2,
+              ),
               isNext: true,
             ),
 
             SizedBox(height: 16.h),
+            if (!controller.isEditMode.value) ...[
+              // Email Field
+              CustomTextField(
+                controller: controller.emailController,
+                label: 'البريد الإلكتروني',
+                hintText: 'أدخل البريد الإلكتروني',
+                prefixIcon: Icon(Icons.email_outlined),
+                keyboardType: TextInputType.emailAddress,
+                validator: controller.validateEmail,
+                radius: BorderRadius.circular(10.r),
+                fillColor: Get.theme.canvasColor,
+                borderSide: BorderSide(
+                  color: Colors.grey.shade300,
+                  width: 1.2,
+                ),
+                isNext: true,
+              ),
 
-            // Email Field
-            CustomTextField(
-              controller: controller.emailController,
-              label: 'البريد الإلكتروني',
-              hintText: 'أدخل البريد الإلكتروني',
-              prefixIcon: Icon(Icons.email_outlined),
-              keyboardType: TextInputType.emailAddress,
-              validator: controller.validateEmail,
-              isNext: true,
-            ),
+              SizedBox(height: 16.h),
 
-            SizedBox(height: 16.h),
-
-            // Password Field
-            Obx(() => CustomTextField(
-                  controller: controller.passwordController,
-                  label: controller.isEditMode.value
-                      ? 'كلمة المرور (اختياري)'
-                      : 'كلمة المرور',
-                  hintText: controller.isEditMode.value
-                      ? 'اتركه فارغاً للاحتفاظ بكلمة المرور الحالية'
-                      : 'أدخل كلمة المرور',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  obscureText: !controller.isPasswordVisible.value,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isPasswordVisible.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+              // Password Field
+              Obx(() => CustomTextField(
+                    controller: controller.passwordController,
+                    label: controller.isEditMode.value
+                        ? 'كلمة المرور (اختياري)'
+                        : 'كلمة المرور',
+                    hintText: controller.isEditMode.value
+                        ? 'اتركه فارغاً للاحتفاظ بكلمة المرور الحالية'
+                        : 'أدخل كلمة المرور',
+                    prefixIcon: Icon(Icons.lock_outline),
+                    obscureText: !controller.isPasswordVisible.value,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: controller.togglePasswordVisibility,
                     ),
-                    onPressed: controller.togglePasswordVisibility,
-                  ),
-                  validator: controller.validatePassword,
-                  isNext: true,
-                )),
+                    validator: controller.validatePassword,
+                    isNext: true,
+                    radius: BorderRadius.circular(10.r),
+                    fillColor: Get.theme.canvasColor,
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade300,
+                      width: 1.2,
+                    ),
+                  )),
 
-            SizedBox(height: 16.h),
-
+              SizedBox(height: 16.h),
+            ],
             // Phone Field
             CustomTextField(
               controller: controller.phoneController,
@@ -112,32 +118,38 @@ class BasicInfoCard extends GetView<AddEditClientController> {
               keyboardType: TextInputType.phone,
               validator: controller.validatePhone,
               isNext: true,
+              radius: BorderRadius.circular(10.r),
+              fillColor: Get.theme.canvasColor,
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+                width: 1.2,
+              ),
             ),
 
             SizedBox(height: 16.h),
 
-            // Active Status Switch
-            Obx(() => SwitchListTile(
-                  title: Text(
-                    'حالة العميل',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  subtitle: Text(
-                    controller.isActive.value ? 'نشط' : 'غير نشط',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color:
-                          controller.isActive.value ? Colors.green : Colors.red,
-                    ),
-                  ),
-                  value: controller.isActive.value,
-                  onChanged: (value) => controller.toggleActiveStatus(),
-                  activeColor: Colors.green,
-                  contentPadding: EdgeInsets.zero,
-                )),
+            // // Active Status Switch
+            // Obx(() => SwitchListTile(
+            //       title: Text(
+            //         'حالة العميل',
+            //         style: TextStyle(
+            //           fontSize: 14.sp,
+            //           fontWeight: FontWeight.w500,
+            //         ),
+            //       ),
+            //       subtitle: Text(
+            //         controller.isActive.value ? 'نشط' : 'غير نشط',
+            //         style: TextStyle(
+            //           fontSize: 12.sp,
+            //           color:
+            //               controller.isActive.value ? Colors.green : Colors.red,
+            //         ),
+            //       ),
+            //       value: controller.isActive.value,
+            //       onChanged: (value) => controller.toggleActiveStatus(),
+            //       activeColor: Colors.green,
+            //       contentPadding: EdgeInsets.zero,
+            //     )),
           ],
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fakhama_amiradmin_app/core/class/statusrequest.dart';
 import 'package:fakhama_amiradmin_app/features/auth/models/user_model.dart';
 import 'package:fakhama_amiradmin_app/features/clients/controllers/clients_controller.dart';
@@ -39,7 +41,8 @@ class AddEditClientController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
+    usernameController.text = generateUsername();
+    countryController.text = "العراق";
     // Check if we're in edit mode
     final arguments = Get.arguments;
     if (arguments != null && arguments is Map) {
@@ -50,6 +53,19 @@ class AddEditClientController extends GetxController {
         _fillFormWithClientData();
       }
     }
+  }
+
+  String generateUsername() {
+    final now = DateTime.now();
+    final timestamp =
+        "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}"
+        "${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}";
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rand = Random();
+    final randomPart =
+        List.generate(4, (index) => chars[rand.nextInt(chars.length)]).join();
+    return "user$timestamp$randomPart";
   }
 
   void _fillFormWithClientData() {
@@ -73,16 +89,6 @@ class AddEditClientController extends GetxController {
 
   void toggleActiveStatus() {
     isActive.value = !isActive.value;
-  }
-
-  String? validateUsername(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'يرجى إدخال اسم المستخدم';
-    }
-    if (value.length < 3) {
-      return 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
-    }
-    return null;
   }
 
   String? validateEmail(String? value) {
@@ -158,12 +164,18 @@ class AddEditClientController extends GetxController {
     Map<String, dynamic> data = {
       'username': usernameController.text.trim(),
       'email': emailController.text.trim(),
+      'password': passwordController.text.trim(),
+      'country': countryController.text.trim(),
       'full_name': fullNameController.text.trim(),
       'phone': phoneController.text.trim(),
       'city': cityController.text.trim(),
       'street_address': streetAddressController.text.trim(),
-      'country': countryController.text.trim(),
     };
+    if (isEditMode.value) {
+      data.remove('username');
+      data.remove('email');
+      data.remove('password');
+    }
 
     // Add password only if not in edit mode or if password is provided
     if (!isEditMode.value || passwordController.text.isNotEmpty) {
@@ -186,7 +198,7 @@ class AddEditClientController extends GetxController {
       return;
     }
     final data = _buildRequestData();
-
+    print(_buildRequestData());
     await handleRequestfunc(
       hideLoading: false,
       status: (status) => statusRequest.value = status,

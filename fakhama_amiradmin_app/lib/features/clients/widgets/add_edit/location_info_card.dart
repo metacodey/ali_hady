@@ -40,19 +40,26 @@ class LocationInfoCard extends GetView<AddEditClientController> {
             ),
 
             SizedBox(height: 16.h),
+            if (!controller.isEditMode.value) ...[
+              // Country Field
+              CustomTextField(
+                controller: controller.countryController,
+                label: 'الدولة',
+                hintText: 'أدخل اسم الدولة',
+                prefixIcon: Icon(Icons.flag_outlined),
+                validator: (value) =>
+                    controller.validateRequired(value, 'الدولة'),
+                isNext: true,
+                radius: BorderRadius.circular(10.r),
+                fillColor: Get.theme.canvasColor,
+                borderSide: BorderSide(
+                  color: Colors.grey.shade300,
+                  width: 1.2,
+                ),
+              ),
 
-            // Country Field
-            CustomTextField(
-              controller: controller.countryController,
-              label: 'الدولة',
-              hintText: 'أدخل اسم الدولة',
-              prefixIcon: Icon(Icons.flag_outlined),
-              validator: (value) =>
-                  controller.validateRequired(value, 'الدولة'),
-              isNext: true,
-            ),
-
-            SizedBox(height: 16.h),
+              SizedBox(height: 16.h),
+            ],
 
             // City Field
             CustomTextField(
@@ -61,6 +68,12 @@ class LocationInfoCard extends GetView<AddEditClientController> {
               hintText: 'أدخل اسم المدينة',
               prefixIcon: Icon(Icons.location_city_outlined),
               isNext: true,
+              radius: BorderRadius.circular(10.r),
+              fillColor: Get.theme.canvasColor,
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+                width: 1.2,
+              ),
             ),
 
             SizedBox(height: 16.h),
@@ -73,54 +86,73 @@ class LocationInfoCard extends GetView<AddEditClientController> {
               prefixIcon: Icon(Icons.home_outlined),
               maxline: 2,
               isNext: true,
-            ),
-
-            SizedBox(height: 16.h),
-
-            // Coordinates Section
-            Text(
-              'الإحداثيات (اختياري)',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+              radius: BorderRadius.circular(10.r),
+              fillColor: Get.theme.canvasColor,
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+                width: 1.2,
               ),
             ),
 
-            SizedBox(height: 8.h),
-
-            Row(
-              children: [
-                // Latitude Field
-                Expanded(
-                  child: CustomTextField(
-                    controller: controller.latitudeController,
-                    label: 'خط العرض',
-                    hintText: '21.5428',
-                    prefixIcon: Icon(Icons.my_location),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    validator: controller.validateLatitude,
-                    isNext: true,
-                  ),
+            SizedBox(height: 16.h),
+            if (!controller.isEditMode.value) ...[
+              // Coordinates Section
+              Text(
+                'الإحداثيات (اختياري)',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
                 ),
+              ),
 
-                SizedBox(width: 12.w),
+              SizedBox(height: 8.h),
 
-                // Longitude Field
-                Expanded(
-                  child: CustomTextField(
-                    controller: controller.longitudeController,
-                    label: 'خط الطول',
-                    hintText: '39.1728',
-                    prefixIcon: Icon(Icons.place),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    validator: controller.validateLongitude,
+              Row(
+                children: [
+                  // Latitude Field
+                  Expanded(
+                    child: CustomTextField(
+                      controller: controller.latitudeController,
+                      label: 'خط العرض',
+                      hintText: '21.5428',
+                      prefixIcon: Icon(Icons.my_location),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      validator: controller.validateLatitude,
+                      isNext: true,
+                      radius: BorderRadius.circular(10.r),
+                      fillColor: Get.theme.canvasColor,
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 1.2,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
+
+                  SizedBox(width: 12.w),
+
+                  // Longitude Field
+                  Expanded(
+                    child: CustomTextField(
+                      controller: controller.longitudeController,
+                      label: 'خط الطول',
+                      hintText: '39.1728',
+                      prefixIcon: Icon(Icons.place),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      validator: controller.validateLongitude,
+                      radius: BorderRadius.circular(10.r),
+                      fillColor: Get.theme.canvasColor,
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 1.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
