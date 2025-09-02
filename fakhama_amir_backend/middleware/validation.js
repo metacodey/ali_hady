@@ -89,14 +89,18 @@ const customerSchemas = {
         'string.pattern.base': 'رقم الهاتف يجب أن يبدأ بـ +964 ويتكون من 13 رقم',
         'any.required': 'رقم الهاتف مطلوب'
       }),
-    city: Joi.string().min(2).max(50).required()
-      .messages({
-        'any.required': 'المدينة مطلوبة'
-      }),
-    street_address: Joi.string().min(5).max(500).required()
-      .messages({
-        'any.required': 'عنوان الشارع مطلوب'
-      }),
+city: Joi.string().min(2).max(50).allow('').optional()
+  .messages({
+    'string.min': 'المدينة يجب أن تحتوي على حرفين على الأقل',
+    'string.max': 'المدينة يجب ألا تتجاوز 50 حرفًا'
+  }),
+
+street_address: Joi.string().min(5).max(500).allow('').optional()
+  .messages({
+    'string.min': 'العنوان يجب أن يحتوي على 5 أحرف على الأقل',
+    'string.max': 'العنوان يجب ألا يتجاوز 500 حرف'
+  }),
+
     country: Joi.string().max(50).optional().default('العراق'),
     latitude: Joi.number().min(-90).max(90).optional(),
     longitude: Joi.number().min(-180).max(180).optional()

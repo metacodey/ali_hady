@@ -60,8 +60,6 @@ class LocationInfoCard extends GetView<AddEditClientController> {
               label: 'المدينة',
               hintText: 'أدخل اسم المدينة',
               prefixIcon: Icon(Icons.location_city_outlined),
-              validator: (value) =>
-                  controller.validateRequired(value, 'المدينة'),
               isNext: true,
             ),
 
