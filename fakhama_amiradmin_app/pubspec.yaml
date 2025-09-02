@@ -1,0 +1,76 @@
+name: fakhama_amiradmin_app
+description: "A new Flutter project."
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  path_provider: ^2.1.5
+  flutter_screenutil: ^5.9.3
+  mc_utils: 
+    path: libraries/mc_utils/
+  shared_preferences: ^2.5.3
+  flutter_easyloading:
+    path: libraries/flutter_easyloading/
+  dartz: ^0.10.1
+  internet_connection_checker: ^3.0.1
+  firebase_core: ^3.13.1
+  firebase_messaging: ^15.2.6
+  shimmer: ^3.0.0
+  permission_handler: ^12.0.0+1
+  firebase_crashlytics: ^4.3.6
+  lucide_icons: ^0.257.0
+  flutter_localizations:
+    sdk: flutter
+  flutter_local_notifications: ^19.3.1
+  geocoding: ^4.0.0
+  location: ^7.0.1
+  url_launcher: ^6.3.1
+  google_maps_flutter: ^2.10.0
+  geolocator:
+    path: libraries/geolocator/
+
+
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/lang/
+  fonts:
+    - family: HacenTypographer
+      fonts:
+        - asset: assets/font/Hacen Typographer Heavy.ttf
+          weight: 500
+          style: italic
+    - family: Air
+      fonts:
+        - asset: assets/font/Air.ttf
+    - family: Amiri
+      fonts:
+        - asset: assets/font/Amiri.ttf
+    - family: Arial
+      fonts:
+        - asset: assets/font/ARIAL.TTF
+        - asset: assets/font/ARIALBD.TTF
+          weight: 700
+        - asset: assets/font/ARIALI.TTF
+          style: italic
+        - asset: assets/font/ARIALBI.TTF
+          weight: 700
+          style: italic
+        - asset: assets/font/ARIBLK.TTF
+          weight: 900
