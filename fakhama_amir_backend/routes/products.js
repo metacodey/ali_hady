@@ -104,33 +104,34 @@ router.get('/all',
     }
   }
 );
-router.get('/status',
-  async (req, res) => {
-    try {
-      const query = "SELECT * FROM `order_statuses`;";
-      const result = await executeQuery(query);
+
+// router.get('/status',
+//   async (req, res) => {
+//     try {
+//       const query = "SELECT * FROM `order_statuses`;";
+//       const result = await executeQuery(query);
       
-      if (!result.success) {
-        return res.status(500).json({
-          success: false,
-          message: 'خطأ في الحالات'
-        });
-      }
+//       if (!result.success) {
+//         return res.status(500).json({
+//           success: false,
+//           message: 'خطأ في الحالات'
+//         });
+//       }
       
-      res.json({
-        success: true,
-        message: 'تم استرداد المنتجات بنجاح',
-        data: result.data
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في الخادم',
-        error: error.message
-      });
-    }
-  }
-);
+//       res.json({
+//         success: true,
+//         message: 'تم استرداد المنتجات بنجاح',
+//         data: result.data
+//       });
+//     } catch (error) {
+//       res.status(500).json({
+//         success: false,
+//         message: 'خطأ في الخادم',
+//         error: error.message
+//       });
+//     }
+//   }
+// );
 
 
 // GET /api/products/admin - عرض جميع المنتجات للإدارة

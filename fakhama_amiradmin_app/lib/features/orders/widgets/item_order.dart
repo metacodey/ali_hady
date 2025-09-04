@@ -1,19 +1,20 @@
+import 'package:fakhama_amiradmin_app/features/orders/controllers/orders_controller.dart';
 import 'package:fakhama_amiradmin_app/features/orders/models/order_model.dart';
+import 'package:fakhama_amiradmin_app/features/orders/models/status_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:mc_utils/mc_utils.dart';
 
-class ItemOrder extends StatelessWidget {
+class ItemOrder extends GetView<OrdersController> {
   final OrderModel order;
-  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onTap;
-  final Function(String)? onStatusChange;
+  final Function(StatusModel)? onStatusChange;
 
   const ItemOrder({
     super.key,
     required this.order,
-    this.onEdit,
     this.onDelete,
     this.onTap,
     this.onStatusChange,
@@ -101,7 +102,7 @@ class ItemOrder extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        order.status,
+                        order.status.tr,
                         style: TextStyle(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600,
@@ -117,8 +118,10 @@ class ItemOrder extends StatelessWidget {
                 // Order Info
                 _buildInfoRow(Icons.phone_outlined, order.customerPhone),
                 SizedBox(height: 6.h),
-                _buildInfoRow(Icons.attach_money_outlined,
-                    '${order.totalAmount.toStringAsFixed(2)} ر.س'),
+                _buildInfoRow(
+                    Icons.attach_money_outlined,
+                    McProcess.formatNumber(
+                        order.totalAmount.toStringAsFixed(2))),
                 SizedBox(height: 6.h),
                 _buildInfoRow(
                     Icons.shopping_cart_outlined, '${order.itemsCount} عنصر'),
@@ -218,17 +221,17 @@ class ItemOrder extends StatelessWidget {
 
   Color _getStatusColor() {
     switch (order.status) {
-      case 'قيد الانتظار':
+      case 'pending':
         return Colors.orange;
-      case 'مؤكد':
+      case 'confirmed':
         return Colors.blue;
-      case 'قيد التحضير':
+      case 'processing':
         return Colors.purple;
-      case 'جاهز للتسليم':
+      case 'shipped':
         return Colors.teal;
-      case 'تم التسليم':
+      case 'delivered':
         return Colors.green;
-      case 'ملغي':
+      case 'cancelled':
         return Colors.red;
       default:
         return Colors.grey;
@@ -236,15 +239,6 @@ class ItemOrder extends StatelessWidget {
   }
 
   void _showStatusChangeDialog(BuildContext context) {
-    final statuses = [
-      'قيد الانتظار',
-      'مؤكد',
-      'قيد التحضير',
-      'جاهز للتسليم',
-      'تم التسليم',
-      'ملغي'
-    ];
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -260,15 +254,19 @@ class ItemOrder extends StatelessWidget {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: statuses
+          children: controller.statusOrder
               .map((status) => ListTile(
-                    title: Text(status),
-                    leading: Radio<String>(
+                    title: Text(status.description),
+                    leading: Radio<StatusModel>(
                       value: status,
-                      groupValue: order.status,
+                      groupValue: controller.statusOrder
+                          .where(
+                            (p0) => p0.name == order.status,
+                          )
+                          .first,
                       onChanged: (value) {
                         Navigator.pop(context);
-                        if (value != null && value != order.status) {
+                        if (value != null && value.name != order.status) {
                           onStatusChange?.call(value);
                         }
                       },

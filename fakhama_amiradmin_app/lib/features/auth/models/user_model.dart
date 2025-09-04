@@ -1,7 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 // models/user_model.dart
 
-class UserModel {
+import 'package:mc_utils/mc_utils.dart';
+
+class UserModel with CustomDropdownListFilter {
   final int? id;
   final String username;
   final String email;
@@ -96,5 +98,17 @@ class UserModel {
       token: token ?? this.token,
       createdAt: createdAt ?? this.createdAt,
     );
+  }
+
+  @override
+  String toString() {
+    //choose varible that you want to display in drop down btn
+    return fullName;
+  }
+
+  @override
+  bool filter(String query) {
+    //choos varible that you want to search by it
+    return fullName.toLowerCase().contains(query.toLowerCase());
   }
 }

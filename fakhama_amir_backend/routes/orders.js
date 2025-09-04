@@ -76,6 +76,62 @@ router.get('/',
   }
 );
 
+router.get('/status',
+  async (req, res) => {
+    try {
+      const query = "SELECT * FROM `order_statuses`;";
+      const result = await executeQuery(query);
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في الحالات'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد المنتجات بنجاح',
+        data: result.data
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
+router.get('/customers',
+  async (req, res) => {
+    try {
+      const query = "SELECT id,full_name FROM `customers`;";
+      const result = await executeQuery(query);
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في الحالات'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد المنتجات بنجاح',
+        data: result.data
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
 // GET /api/orders/my - طلبات العميل المسجل دخوله
 router.get('/my',
   verifyToken,
@@ -220,7 +276,7 @@ router.get('/:id',
 // POST /api/orders - إنشاء طلب جديد
 router.post('/',
   verifyToken,
-  checkUserType(['customer']),
+  checkUserType(['user']),
   verifyCustomer,
   validate(orderSchemas.create),
   async (req, res) => {
@@ -267,12 +323,12 @@ router.post('/',
           });
         }
         
-        if (product.quantity < item.quantity) {
-          return res.status(400).json({
-            success: false,
-            message: `الكمية المطلوبة من ${product.name} غير متاحة. المتاح: ${product.quantity}`
-          });
-        }
+        // if (product.quantity < item.quantity) {
+        //   return res.status(400).json({
+        //     success: false,
+        //     message: `الكمية المطلوبة من ${product.name} غير متاحة. المتاح: ${product.quantity}`
+        //   });
+        // }
         
         const itemTotal = product.price * item.quantity;
         totalAmount += itemTotal;
@@ -348,6 +404,7 @@ router.post('/',
     }
   }
 );
+
 
 // PUT /api/orders/:id/status - تحديث حالة الطلب (للمشرفين فقط)
 router.put('/:id/status',

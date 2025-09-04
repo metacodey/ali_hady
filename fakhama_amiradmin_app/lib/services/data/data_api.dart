@@ -80,23 +80,6 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 
-  getCustomerOrders(int customerId, {int page = 1, int limit = 10}) async {
-    Map<String, String> queryParams = {
-      'page': page.toString(),
-      'limit': limit.toString(),
-    };
-
-    String queryString = queryParams.entries
-        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-        .join('&');
-
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.customerOrders}$customerId/orders?$queryString",
-        method: "GET");
-    return res.fold((lef) => lef, (re) => re);
-  }
-
   getCustomersStats() async {
     var res = await apiReq.dynamicData(
         headers: _headerWithToken() ?? {},
@@ -255,6 +238,22 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 
+  getCustomersOrders() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.customersOrders,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  getProductsOrders() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.productsAll,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
   getMyOrders({int page = 1, int limit = 10}) async {
     Map<String, String> queryParams = {
       'page': page.toString(),
@@ -290,7 +289,7 @@ class DataApi {
   }
 
   updateOrderStatus(int orderId, Map<String, dynamic> data) async {
-    var res = await apiReq.sendJsonData(
+    var res = await apiReq.updateJsonData(
       headers: _headerWithToken() ?? {},
       url: "${ApiServices.updateOrderStatus}$orderId/status",
       data: data,

@@ -21,11 +21,11 @@ class ApiServices {
   static String addCustomer = "${server}customers";
   static String editCustomer = "${server}customers/";
   static String deleteCustomer = "${server}customers/";
-  static String customerOrders = "${server}customers/";
   static String customersStats = "${server}customers/dashboard/stats";
 
   // Product endpoints
   static String productsList = "${server}products";
+  static String productsAll = "${server}products/all";
   static String productsAdmin = "${server}products/admin";
   static String showProduct = "${server}products/";
   static String addProduct = "${server}products";
@@ -43,7 +43,8 @@ class ApiServices {
   static String updateOrderStatus = "${server}orders/";
   static String deleteOrder = "${server}orders/";
   static String ordersStats = "${server}orders/dashboard/stats";
-  static String statusOrders = "${server}products/status";
+  static String statusOrders = "${server}orders/status";
+  static String customersOrders = "${server}orders/customers";
 
   // Payment endpoints
   static String paymentsList = "${server}payments";

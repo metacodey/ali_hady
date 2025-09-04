@@ -33,7 +33,7 @@ class ListOrders extends GetView<OrdersController> {
                     controller.deleteOrder(order.id);
                   },
                   onStatusChange: (newStatus) {
-                    // controller.updateOrderStatus(order.id, newStatus);
+                    controller.updateOrderStatus(order.id, newStatus);
                   },
                   onTap: () {
                     _showOrderDetails(context, order);

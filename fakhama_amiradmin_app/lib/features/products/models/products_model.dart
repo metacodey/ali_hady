@@ -1,6 +1,8 @@
 // models/product_model.dart
 
-class ProductModel {
+import 'package:mc_utils/mc_utils.dart';
+
+class ProductModel with CustomDropdownListFilter {
   final int? id;
   final String name;
   final String? description;
@@ -53,5 +55,17 @@ class ProductModel {
       "created_at": createdAt?.toIso8601String(),
       "category_name": categoryName,
     };
+  }
+
+  @override
+  String toString() {
+    //choose varible that you want to display in drop down btn
+    return name;
+  }
+
+  @override
+  bool filter(String query) {
+    //choos varible that you want to search by it
+    return name.toLowerCase().contains(query.toLowerCase());
   }
 }

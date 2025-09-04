@@ -164,6 +164,7 @@ const productSchemas = {
 // Schemas للطلبات
 const orderSchemas = {
   create: Joi.object({
+    customer_id:Joi.number().integer().positive().optional(),
     items: Joi.array().items(
       Joi.object({
         product_id: Joi.number().integer().positive().required(),
@@ -173,12 +174,12 @@ const orderSchemas = {
       .messages({
         'array.min': 'يجب أن يحتوي الطلب على منتج واحد على الأقل'
       }),
-    customer_notes: Joi.string().max(1000).optional()
+    customer_notes: Joi.string().max(1000).optional().allow(null, '')
   }),
   
   updateStatus: Joi.object({
     status_id: Joi.number().integer().positive().required(),
-    admin_notes: Joi.string().max(1000).optional()
+    admin_notes: Joi.string().max(1000).optional().allow(null, '')
   })
 };
 

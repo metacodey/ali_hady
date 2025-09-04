@@ -36,28 +36,28 @@ void dismissLoading() {
 String _formatErrorMessage(dynamic errorData) {
   if (errorData is Map) {
     String message = errorData['message']?.toString() ?? 'حدث خطأ';
-    
+
     // Check if errors field exists and is a list
     if (errorData.containsKey('errors') && errorData['errors'] is List) {
       List errors = errorData['errors'];
       if (errors.isNotEmpty) {
         List<String> errorMessages = [];
-        
+
         for (var error in errors) {
           if (error is Map && error.containsKey('message')) {
             errorMessages.add('• ${error['message']}');
           }
         }
-        
+
         if (errorMessages.isNotEmpty) {
           message += '\n\nتفاصيل الأخطاء:\n${errorMessages.join('\n')}';
         }
       }
     }
-    
+
     return message;
   }
-  
+
   return errorData?.toString() ?? 'حدث خطأ غير معروف';
 }
 
@@ -103,7 +103,7 @@ Future<void> handleRequestfunc<T>({
             result['success'] == false ||
             result.keys.where((key) => key == 'error').isNotEmpty)) {
       status?.call(StatusRequest.serviceunavailable);
-      
+
       // Use the new error formatting function
       String errorMessage = _formatErrorMessage(result);
       onError(errorMessage);
@@ -133,6 +133,6 @@ Future<void> handleRequestfunc<T>({
 
 void _handleOffline(
     Function(String) onError, Function(StatusRequest)? onStatusChange) {
-  onError(StatusRequest.offlinefailure.text);
+  // onError(StatusRequest.offlinefailure.text);
   onStatusChange?.call(StatusRequest.offlinefailure);
 }

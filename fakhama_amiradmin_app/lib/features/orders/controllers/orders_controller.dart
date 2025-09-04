@@ -70,10 +70,9 @@ class OrdersController extends GetxController {
     }
 
     // تطبيق فلتر الحالة
-    if (selectedStatus.value != null &&
-        selectedStatus.value != 'جميع الحالات') {
+    if (selectedStatus.value != null) {
       filtered = filtered.where((order) {
-        return order.status == selectedStatus.value;
+        return order.status == selectedStatus.value?.name;
       }).toList();
     }
 
@@ -165,6 +164,7 @@ class OrdersController extends GetxController {
 
   Future<void> fetachStatus() async {
     await handleRequestfunc(
+      hideLoading: true,
       apiCall: () async {
         return await dataApi.getStatus();
       },
@@ -201,7 +201,7 @@ class OrdersController extends GetxController {
     await handleRequestfunc(
       apiCall: () async {
         return await dataApi.updateOrderStatus(
-            orderId, {"status_id": newStatus.id, 'note': note});
+            orderId, {"status_id": newStatus.id, 'admin_notes': note});
       },
       onSuccess: (res) {
         fetchData(hideLoading: true);
