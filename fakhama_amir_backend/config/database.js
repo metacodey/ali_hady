@@ -2,6 +2,20 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 // إعداد اتصال قاعدة البيانات
+// const dbConfig = {
+//   host: process.env.DB_HOST || 'localhost',
+//   port: process.env.DB_PORT || 3306,
+//   user: process.env.DB_USER || 'root',
+//   password: process.env.DB_PASSWORD || '',
+//   database: process.env.DB_NAME || 'fakhama_amir',
+//   charset: 'utf8mb4',
+//   timezone: '+03:00', // توقيت السعودية
+//   connectionLimit: 10,
+//   acquireTimeout: 60000,
+//   timeout: 60000,
+//   reconnect: true
+// };
+// في ملف database.js
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
@@ -9,13 +23,12 @@ const dbConfig = {
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'fakhama_amir',
   charset: 'utf8mb4',
-  timezone: '+03:00', // توقيت السعودية
+  timezone: '+03:00',
   connectionLimit: 10,
   acquireTimeout: 60000,
   timeout: 60000,
-  reconnect: true
+  reconnectOnError: true // بدلاً من reconnect: true
 };
-
 // إنشاء pool للاتصالات
 const pool = mysql.createPool(dbConfig);
 

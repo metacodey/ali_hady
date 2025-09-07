@@ -5,7 +5,7 @@ const { executeQuery, getPaginatedData } = require('../config/database');
 const { validate, validateParams, validateQuery, customerSchemas, commonSchemas } = require('../middleware/validation');
 const { verifyToken, checkUserType } = require('../middleware/auth');
 
-// GET /api/customers - عرض جميع العملاء (للمشرفين فقط)
+// GET /api/customers - عرض جميع العملاء مع المبلغ المتبقي (للمشرفين فقط)
 router.get('/', 
   verifyToken,
   checkUserType(['user']),
@@ -16,24 +16,44 @@ router.get('/',
       
       let baseQuery = `
         SELECT 
-          id, username, email, full_name, phone, city, country,
-          is_active, email_verified, phone_verified, created_at, last_login
-        FROM customers
+          c.id, c.username, c.email, c.full_name, c.phone, c.city, c.country,
+          c.is_active, c.email_verified, c.phone_verified, c.created_at, c.last_login,
+          COALESCE(order_totals.total_orders, 0) as total_orders,
+          COALESCE(order_totals.total_amount, 0.00) as total_amount,
+          COALESCE(payment_totals.total_paid, 0.00) as total_paid,
+          COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount
+        FROM customers c
+        LEFT JOIN (
+          SELECT 
+            customer_id,
+            COUNT(*) as total_orders,
+            SUM(total_amount) as total_amount
+          FROM orders 
+          GROUP BY customer_id
+        ) order_totals ON c.id = order_totals.customer_id
+        LEFT JOIN (
+          SELECT 
+            o.customer_id,
+            SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid
+          FROM orders o
+          LEFT JOIN payments p ON o.id = p.order_id
+          GROUP BY o.customer_id
+        ) payment_totals ON c.id = payment_totals.customer_id
       `;
       
-      let countQuery = 'SELECT COUNT(*) as total FROM customers';
+      let countQuery = 'SELECT COUNT(*) as total FROM customers c';
       let params = [];
       
       // إضافة البحث إذا كان موجود
       if (search) {
-        const searchCondition = ' WHERE full_name LIKE ? OR email LIKE ? OR phone LIKE ?';
+        const searchCondition = ' WHERE c.full_name LIKE ? OR c.email LIKE ? OR c.phone LIKE ?';
         baseQuery += searchCondition;
         countQuery += searchCondition;
         const searchParam = `%${search}%`;
         params = [searchParam, searchParam, searchParam];
       }
       
-      baseQuery += ' ORDER BY created_at DESC';
+      baseQuery += ' ORDER BY c.created_at DESC';
       
       const result = await getPaginatedData(baseQuery, countQuery, params, page, limit);
       
@@ -44,10 +64,22 @@ router.get('/',
         });
       }
       
+      // تنسيق البيانات لإظهار المبالغ بشكل واضح
+      const formattedData = result.data.map(customer => ({
+        ...customer,
+        financial_summary: {
+          total_orders: customer.total_orders,
+          total_amount: parseFloat(customer.total_amount),
+          total_paid: parseFloat(customer.total_paid),
+          remaining_amount: parseFloat(customer.remaining_amount),
+          payment_status: customer.remaining_amount > 0 ? 'has_debt' : 'paid_up'
+        }
+      }));
+      
       res.json({
         success: true,
         message: 'تم استرداد بيانات العملاء بنجاح',
-        data: result.data,
+        data: formattedData,
         pagination: result.pagination
       });
     } catch (error) {
@@ -59,7 +91,8 @@ router.get('/',
     }
   }
 );
-// GET /api/map - عرض جميع العملاء (للمشرفين فقط)
+
+// GET /api/customers/map - عرض جميع العملاء مع المبلغ المتبقي على الخريطة
 router.get('/map', 
  verifyToken,
  checkUserType(['user']),
@@ -67,9 +100,26 @@ router.get('/map',
    try {
      const query = `
        SELECT 
-         id, full_name, phone, latitude, longitude
-       FROM customers
-       ORDER BY created_at DESC
+         c.id, c.full_name, c.phone, c.latitude, c.longitude,
+         COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount
+       FROM customers c
+       LEFT JOIN (
+         SELECT 
+           customer_id,
+           SUM(total_amount) as total_amount
+         FROM orders 
+         GROUP BY customer_id
+       ) order_totals ON c.id = order_totals.customer_id
+       LEFT JOIN (
+         SELECT 
+           o.customer_id,
+           SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid
+         FROM orders o
+         LEFT JOIN payments p ON o.id = p.order_id
+         GROUP BY o.customer_id
+       ) payment_totals ON c.id = payment_totals.customer_id
+       WHERE c.latitude IS NOT NULL AND c.longitude IS NOT NULL
+       ORDER BY c.created_at DESC
      `;
      
      const result = await executeQuery(query);
@@ -81,10 +131,18 @@ router.get('/map',
        });
      }
      
+     // تنسيق البيانات للخريطة مع المبلغ المتبقي
+     const mapData = result.data.map(customer => ({
+       ...customer,
+       remaining_amount: parseFloat(customer.remaining_amount),
+       debt_level: customer.remaining_amount > 1000 ? 'high' : 
+                  customer.remaining_amount > 0 ? 'medium' : 'none'
+     }));
+     
      res.json({
        success: true,
        message: 'تم استرداد بيانات العملاء بنجاح',
-       data: result.data
+       data: mapData
      });
    } catch (error) {
      res.status(500).json({
@@ -96,7 +154,7 @@ router.get('/map',
  }
 );
 
-// GET /api/customers/:id - عرض عميل واحد
+// GET /api/customers/:id - عرض عميل واحد مع تفاصيل مالية كاملة
 router.get('/:id',
   verifyToken,
   checkUserType(['user']),
@@ -107,15 +165,37 @@ router.get('/:id',
       
       const query = `
         SELECT 
-          id, username, email, full_name, phone, 
-          city, country, street_address, latitude, longitude,
-          profile_image, is_active, email_verified, phone_verified,
-          created_at, updated_at, last_login
-        FROM customers 
-        WHERE id = ?
+          c.id, c.username, c.email, c.full_name, c.phone, 
+          c.city, c.country, c.street_address, c.latitude, c.longitude,
+          c.profile_image, c.is_active, c.email_verified, c.phone_verified,
+          c.created_at, c.updated_at, c.last_login,
+          COALESCE(order_totals.total_orders, 0) as total_orders,
+          COALESCE(order_totals.total_amount, 0.00) as total_amount,
+          COALESCE(payment_totals.total_paid, 0.00) as total_paid,
+          COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount
+        FROM customers c
+        LEFT JOIN (
+          SELECT 
+            customer_id,
+            COUNT(*) as total_orders,
+            SUM(total_amount) as total_amount
+          FROM orders 
+          WHERE customer_id = ?
+          GROUP BY customer_id
+        ) order_totals ON c.id = order_totals.customer_id
+        LEFT JOIN (
+          SELECT 
+            o.customer_id,
+            SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid
+          FROM orders o
+          LEFT JOIN payments p ON o.id = p.order_id
+          WHERE o.customer_id = ?
+          GROUP BY o.customer_id
+        ) payment_totals ON c.id = payment_totals.customer_id
+        WHERE c.id = ?
       `;
       
-      const result = await executeQuery(query, [id]);
+      const result = await executeQuery(query, [id, id, id]);
       
       if (!result.success) {
         return res.status(500).json({
@@ -131,10 +211,26 @@ router.get('/:id',
         });
       }
       
+      const customer = result.data[0];
+      
+      // إضافة تفاصيل مالية منظمة
+      const customerWithFinancials = {
+        ...customer,
+        financial_details: {
+          total_orders: customer.total_orders,
+          total_amount: parseFloat(customer.total_amount),
+          total_paid: parseFloat(customer.total_paid),
+          remaining_amount: parseFloat(customer.remaining_amount),
+          payment_percentage: customer.total_amount > 0 ? 
+            ((customer.total_paid / customer.total_amount) * 100).toFixed(2) : 0,
+          status: customer.remaining_amount > 0 ? 'مديون' : 'مسدد'
+        }
+      };
+      
       res.json({
         success: true,
         message: 'تم استرداد بيانات العميل بنجاح',
-        data: result.data[0]
+        data: customerWithFinancials
       });
     } catch (error) {
       res.status(500).json({
@@ -146,6 +242,160 @@ router.get('/:id',
   }
 );
 
+// GET /api/customers/dashboard/stats - إحصائيات العملاء مع المعلومات المالية
+router.get('/dashboard/stats',
+  verifyToken,
+  checkUserType(['user']),
+  async (req, res) => {
+    try {
+      const statsQuery = `
+        SELECT 
+          COUNT(*) as total_customers,
+          COUNT(CASE WHEN c.is_active = 1 THEN 1 END) as active_customers,
+          COUNT(CASE WHEN DATE(c.created_at) = CURDATE() THEN 1 END) as new_today,
+          COUNT(CASE WHEN DATE(c.created_at) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 END) as new_this_week,
+          COUNT(CASE WHEN financial_data.remaining_amount > 0 THEN 1 END) as customers_with_debt,
+          COALESCE(SUM(financial_data.remaining_amount), 0) as total_debt,
+          COALESCE(AVG(financial_data.remaining_amount), 0) as average_debt_per_customer
+        FROM customers c
+        LEFT JOIN (
+          SELECT 
+            c.id,
+            COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount
+          FROM customers c
+          LEFT JOIN (
+            SELECT customer_id, SUM(total_amount) as total_amount
+            FROM orders GROUP BY customer_id
+          ) order_totals ON c.id = order_totals.customer_id
+          LEFT JOIN (
+            SELECT 
+              o.customer_id,
+              SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid
+            FROM orders o
+            LEFT JOIN payments p ON o.id = p.order_id
+            GROUP BY o.customer_id
+          ) payment_totals ON c.id = payment_totals.customer_id
+        ) financial_data ON c.id = financial_data.id
+      `;
+      
+      const result = await executeQuery(statsQuery);
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في استرداد إحصائيات العملاء'
+        });
+      }
+      
+      const stats = result.data[0];
+      
+      // تنسيق الإحصائيات
+      const formattedStats = {
+        customers: {
+          total: stats.total_customers,
+          active: stats.active_customers,
+          new_today: stats.new_today,
+          new_this_week: stats.new_this_week
+        },
+        financial: {
+          customers_with_debt: stats.customers_with_debt,
+          total_debt: parseFloat(stats.total_debt),
+          average_debt: parseFloat(stats.average_debt_per_customer),
+          debt_percentage: stats.total_customers > 0 ? 
+            ((stats.customers_with_debt / stats.total_customers) * 100).toFixed(2) : 0
+        }
+      };
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد الإحصائيات بنجاح',
+        data: formattedStats
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
+// GET /api/customers/debts - قائمة العملاء المديونين فقط
+router.get('/debts/list',
+  verifyToken,
+  checkUserType(['user']),
+  validateQuery(commonSchemas.pagination),
+  async (req, res) => {
+    try {
+      const { page, limit } = req.validatedQuery;
+      
+      const baseQuery = `
+        SELECT 
+          c.id, c.full_name, c.email, c.phone, c.city,
+          COALESCE(order_totals.total_amount, 0.00) as total_amount,
+          COALESCE(payment_totals.total_paid, 0.00) as total_paid,
+          COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount,
+          c.last_login
+        FROM customers c
+        LEFT JOIN (
+          SELECT customer_id, SUM(total_amount) as total_amount
+          FROM orders GROUP BY customer_id
+        ) order_totals ON c.id = order_totals.customer_id
+        LEFT JOIN (
+          SELECT 
+            o.customer_id,
+            SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid
+          FROM orders o
+          LEFT JOIN payments p ON o.id = p.order_id
+          GROUP BY o.customer_id
+        ) payment_totals ON c.id = payment_totals.customer_id
+        HAVING remaining_amount > 0
+      `;
+      
+      const countQuery = `
+        SELECT COUNT(*) as total FROM (
+          ${baseQuery}
+        ) as debt_customers
+      `;
+      
+      const result = await getPaginatedData(
+        baseQuery + ' ORDER BY remaining_amount DESC', 
+        countQuery, 
+        [], 
+        page, 
+        limit
+      );
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في استرداد قائمة المديونين'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد قائمة العملاء المديونين بنجاح',
+        data: result.data.map(customer => ({
+          ...customer,
+          remaining_amount: parseFloat(customer.remaining_amount),
+          total_amount: parseFloat(customer.total_amount),
+          total_paid: parseFloat(customer.total_paid)
+        })),
+        pagination: result.pagination
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
+// باقي الروتات تبقى كما هي...
 // POST /api/customers - إنشاء عميل جديد
 router.post('/',
   validate(customerSchemas.create),
@@ -344,10 +594,14 @@ router.get('/:id/orders',
         SELECT 
           o.id, o.order_number, o.total_amount,
           os.name as status, os.color as status_color,
-          o.created_at, o.customer_notes, o.admin_notes
+          o.created_at, o.customer_notes, o.admin_notes,
+          COALESCE(SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END), 0) as paid_amount,
+          o.total_amount - COALESCE(SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END), 0) as remaining_amount
         FROM orders o
         JOIN order_statuses os ON o.status_id = os.id
+        LEFT JOIN payments p ON o.id = p.order_id
         WHERE o.customer_id = ?
+        GROUP BY o.id, o.order_number, o.total_amount, os.name, os.color, o.created_at, o.customer_notes, o.admin_notes
       `;
       
       const countQuery = 'SELECT COUNT(*) as total FROM orders WHERE customer_id = ?';
@@ -364,47 +618,13 @@ router.get('/:id/orders',
       res.json({
         success: true,
         message: 'تم استرداد طلبات العميل بنجاح',
-        data: result.data,
+        data: result.data.map(order => ({
+          ...order,
+          total_amount: parseFloat(order.total_amount),
+          paid_amount: parseFloat(order.paid_amount),
+          remaining_amount: parseFloat(order.remaining_amount)
+        })),
         pagination: result.pagination
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في الخادم',
-        error: error.message
-      });
-    }
-  }
-);
-
-// GET /api/customers/stats - إحصائيات العملاء
-router.get('/dashboard/stats',
-  verifyToken,
-  checkUserType(['user']),
-  async (req, res) => {
-    try {
-      const statsQuery = `
-        SELECT 
-          COUNT(*) as total_customers,
-          COUNT(CASE WHEN is_active = 1 THEN 1 END) as active_customers,
-          COUNT(CASE WHEN DATE(created_at) = CURDATE() THEN 1 END) as new_today,
-          COUNT(CASE WHEN DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 END) as new_this_week
-        FROM customers
-      `;
-      
-      const result = await executeQuery(statsQuery);
-      
-      if (!result.success) {
-        return res.status(500).json({
-          success: false,
-          message: 'خطأ في استرداد إحصائيات العملاء'
-        });
-      }
-      
-      res.json({
-        success: true,
-        message: 'تم استرداد الإحصائيات بنجاح',
-        data: result.data[0]
       });
     } catch (error) {
       res.status(500).json({

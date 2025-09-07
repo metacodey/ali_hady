@@ -1,4 +1,5 @@
 import 'package:fakhama_amiradmin_app/features/clients/screens/home_clients_screen.dart';
+import 'package:fakhama_amiradmin_app/features/payments/screens/home_payments_screen.dart';
 import 'package:fakhama_amiradmin_app/features/products/screens/home_products_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -39,9 +40,7 @@ class HomeController extends GetxController {
     const HomeProductsScreen(),
     const HomeMapScreen(),
     const HomeOrdersScreen(),
-    Center(
-      child: Text("4"),
-    ),
+    const HomePaymentsScreen(),
   ];
 
   void jumpToPage(int index) {

@@ -11,6 +11,7 @@ class ItemOrder extends GetView<OrdersController> {
   final VoidCallback? onDelete;
   final VoidCallback? onTap;
   final Function(StatusModel)? onStatusChange;
+  final VoidCallback? onPayment; // إضافة callback للدفع
 
   const ItemOrder({
     super.key,
@@ -18,6 +19,7 @@ class ItemOrder extends GetView<OrdersController> {
     this.onDelete,
     this.onTap,
     this.onStatusChange,
+    this.onPayment, // إضافة parameter للدفع
   });
 
   @override
@@ -71,7 +73,7 @@ class ItemOrder extends GetView<OrdersController> {
                           Text(
                             'طلب #${order.orderNumber}',
                             style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey.shade800,
                             ),
@@ -123,6 +125,8 @@ class ItemOrder extends GetView<OrdersController> {
                     McProcess.formatNumber(
                         order.totalAmount.toStringAsFixed(2))),
                 SizedBox(height: 6.h),
+                _buildPaymentInfoRow(),
+                SizedBox(height: 6.h),
                 _buildInfoRow(
                     Icons.shopping_cart_outlined, '${order.itemsCount} عنصر'),
 
@@ -151,6 +155,15 @@ class ItemOrder extends GetView<OrdersController> {
                       onPressed: () => _showStatusChangeDialog(context),
                     ),
                     SizedBox(width: 8.w),
+                    // إضافة زر الدفع للفواتير غير المدفوعة بالكامل
+                    if (order.paidAmount < order.totalAmount) ...[
+                      _buildActionButton(
+                        icon: Icons.payment_outlined,
+                        color: Colors.green,
+                        onPressed: onPayment,
+                      ),
+                      SizedBox(width: 8.w),
+                    ],
                     _buildActionButton(
                       icon: Icons.delete_outline,
                       color: Colors.red,
@@ -321,5 +334,85 @@ class ItemOrder extends GetView<OrdersController> {
         ],
       ),
     );
+  }
+
+  Widget _buildPaymentInfoRow() {
+    Color paymentColor = _getPaymentStatusColor();
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: paymentColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: paymentColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.payment_outlined,
+            size: 16.sp,
+            color: paymentColor,
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      order.paymentStatus,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: paymentColor,
+                      ),
+                    ),
+                    Text(
+                      '${order.paymentPercentage}%',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                        color: paymentColor,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 2.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'مدفوع: ${McProcess.formatNumber(order.paidAmount.toStringAsFixed(2))}',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Text(
+                      'متبقي: ${McProcess.formatNumber(order.remainingAmount.toStringAsFixed(2))}',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getPaymentStatusColor() {
+    if (order.paidAmount >= order.totalAmount) {
+      return Colors.green;
+    } else if (order.paidAmount > 0) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
   }
 }

@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 // models/user_model.dart
 
+import 'package:fakhama_amiradmin_app/features/auth/models/financial_summary.dart';
 import 'package:mc_utils/mc_utils.dart';
 
 class UserModel with CustomDropdownListFilter {
@@ -18,36 +19,57 @@ class UserModel with CustomDropdownListFilter {
   final String? token;
   final DateTime? createdAt;
 
-  UserModel(
-      {this.id,
-      this.username = "",
-      this.email = "",
-      required this.fullName,
-      required this.phone,
-      this.city,
-      this.country,
-      this.streetAddress,
-      this.latitude,
-      this.longitude,
-      required this.isActive,
-      this.createdAt,
-      this.token});
+  // البيانات المالية الجديدة
+  final int? totalOrders;
+  final double? totalAmount;
+  final double? totalPaid;
+  final double? remainingAmount;
+  final FinancialSummary? financialSummary;
+
+  UserModel({
+    this.id,
+    this.username = "",
+    this.email = "",
+    required this.fullName,
+    required this.phone,
+    this.city,
+    this.country,
+    this.streetAddress,
+    this.latitude,
+    this.longitude,
+    required this.isActive,
+    this.createdAt,
+    this.token,
+    this.totalOrders,
+    this.totalAmount,
+    this.totalPaid,
+    this.remainingAmount,
+    this.financialSummary,
+  });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-        id: int.tryParse(json['id'].toString()),
-        username: json['username'] ?? '',
-        email: json['email'] ?? '',
-        fullName: json['full_name'] ?? '',
-        phone: json['phone'] ?? '',
-        city: json['city'] ?? '',
-        country: json['country'],
-        streetAddress: json['street_address'],
-        latitude: double.tryParse(json['latitude'].toString()),
-        longitude: double.tryParse(json['longitude'].toString()),
-        isActive: json['is_active'] == 1 ? true : false,
-        createdAt: DateTime.tryParse(json['created_at'].toString()),
-        token: json['token']);
+      id: int.tryParse(json['id'].toString()),
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      fullName: json['full_name'] ?? '',
+      phone: json['phone'] ?? '',
+      city: json['city'] ?? '',
+      country: json['country'],
+      streetAddress: json['street_address'],
+      latitude: double.tryParse(json['latitude'].toString()),
+      longitude: double.tryParse(json['longitude'].toString()),
+      isActive: json['is_active'] == 1 ? true : false,
+      createdAt: DateTime.tryParse(json['created_at'].toString()),
+      token: json['token'],
+      totalOrders: int.tryParse(json['total_orders'].toString()),
+      totalAmount: double.tryParse(json['total_amount'].toString()),
+      totalPaid: double.tryParse(json['total_paid'].toString()),
+      remainingAmount: double.tryParse(json['remaining_amount'].toString()),
+      financialSummary: json['financial_summary'] != null
+          ? FinancialSummary.fromJson(json['financial_summary'])
+          : null,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -64,7 +86,12 @@ class UserModel with CustomDropdownListFilter {
       "longitude": longitude,
       "is_active": isActive,
       "created_at": createdAt?.toIso8601String(),
-      'token': token
+      'token': token,
+      'total_orders': totalOrders,
+      'total_amount': totalAmount,
+      'total_paid': totalPaid,
+      'remaining_amount': remainingAmount,
+      'financial_summary': financialSummary?.toJson(),
     };
   }
 
@@ -82,6 +109,11 @@ class UserModel with CustomDropdownListFilter {
     bool? isActive,
     String? token,
     DateTime? createdAt,
+    int? totalOrders,
+    double? totalAmount,
+    double? totalPaid,
+    double? remainingAmount,
+    FinancialSummary? financialSummary,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -97,6 +129,11 @@ class UserModel with CustomDropdownListFilter {
       isActive: isActive ?? this.isActive,
       token: token ?? this.token,
       createdAt: createdAt ?? this.createdAt,
+      totalOrders: totalOrders ?? this.totalOrders,
+      totalAmount: totalAmount ?? this.totalAmount,
+      totalPaid: totalPaid ?? this.totalPaid,
+      remainingAmount: remainingAmount ?? this.remainingAmount,
+      financialSummary: financialSummary ?? this.financialSummary,
     );
   }
 

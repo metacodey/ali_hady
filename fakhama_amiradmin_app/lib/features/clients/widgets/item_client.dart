@@ -1,6 +1,7 @@
 import 'package:fakhama_amiradmin_app/features/auth/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mc_utils/mc_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ItemClient extends StatelessWidget {
@@ -127,6 +128,119 @@ class ItemClient extends StatelessWidget {
                       '${client.city}${client.country?.isNotEmpty == true ? ', ${client.country}' : ''}'),
                 ],
 
+                // Financial Information
+                if (client.totalOrders != null ||
+                    client.financialSummary != null) ...[
+                  SizedBox(height: 12.h),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8.r),
+                      border:
+                          Border.all(color: Colors.blue.shade200, width: 0.5),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet_outlined,
+                              size: 16.sp,
+                              color: Colors.blue.shade700,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              'الملخص المالي',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade800,
+                              ),
+                            ),
+                            Spacer(),
+                            if (client.financialSummary?.paymentStatus != null)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w, vertical: 2.h),
+                                decoration: BoxDecoration(
+                                  color: _getPaymentStatusColor(client
+                                          .financialSummary!.paymentStatus)
+                                      .withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  _getPaymentStatusText(
+                                      client.financialSummary!.paymentStatus),
+                                  style: TextStyle(
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: _getPaymentStatusColor(
+                                        client.financialSummary!.paymentStatus),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: _buildCompactFinancialItem(
+                                '${client.totalOrders ?? client.financialSummary?.totalOrders ?? 0}',
+                                'طلب',
+                                Icons.shopping_bag_outlined,
+                                Colors.blue.shade600,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 24.h,
+                              color: Colors.grey.shade300,
+                              margin: EdgeInsets.symmetric(horizontal: 8.w),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: _buildCompactFinancialItem(
+                                McProcess.formatNumber((client.totalAmount ??
+                                        client.financialSummary?.totalAmount ??
+                                        0.0)
+                                    .toString()),
+                                'مدفوع',
+                                Icons.attach_money,
+                                Colors.green.shade600,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 24.h,
+                              color: Colors.grey.shade300,
+                              margin: EdgeInsets.symmetric(horizontal: 8.w),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: _buildCompactFinancialItem(
+                                McProcess.formatNumber(
+                                    (client.remainingAmount ??
+                                            client.financialSummary
+                                                ?.remainingAmount ??
+                                            0.0)
+                                        .toString()),
+                                'متبقي',
+                                Icons.pending_outlined,
+                                _getPaymentStatusColor(
+                                    client.financialSummary?.paymentStatus),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 SizedBox(height: 16.h),
 
                 // Action Buttons
@@ -181,6 +295,54 @@ class ItemClient extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildCompactFinancialItem(
+      String value, String label, IconData icon, Color color) {
+    return Column(
+      children: [
+        McText(
+          txt: value,
+          fontSize: 11.sp,
+          blod: true,
+          color: color,
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9.sp,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getPaymentStatusColor(String? status) {
+    switch (status) {
+      case 'paid':
+        return Colors.green;
+      case 'has_debt':
+        return Colors.orange;
+      case 'unpaid':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getPaymentStatusText(String status) {
+    switch (status) {
+      case 'paid':
+        return 'مدفوع بالكامل';
+      case 'has_debt':
+        return 'يوجد مديونية';
+      case 'unpaid':
+        return 'غير مدفوع';
+      default:
+        return 'غير محدد';
+    }
   }
 
   Widget _buildActionButton({

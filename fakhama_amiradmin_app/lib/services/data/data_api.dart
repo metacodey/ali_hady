@@ -254,6 +254,14 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 
+  getOrdersIncomplete() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.ordersIncomplete,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
   getMyOrders({int page = 1, int limit = 10}) async {
     Map<String, String> queryParams = {
       'page': page.toString(),
@@ -272,10 +280,10 @@ class DataApi {
   }
 
   showOrder(int orderId) async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.showOrder}$orderId",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.showOrder}$orderId",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -327,18 +335,18 @@ class DataApi {
         .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
         .join('&');
 
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.paymentsList}?$queryString",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.paymentsList}?$queryString",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
   getOrderPayments(int orderId) async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.orderPayments}$orderId",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.orderPayments}$orderId",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -369,10 +377,10 @@ class DataApi {
   }
 
   deletePayment(int paymentId) async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.deletePayment}$paymentId",
-        method: "DELETE");
+    var res = await apiReq.deleteData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.deletePayment}$paymentId",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 

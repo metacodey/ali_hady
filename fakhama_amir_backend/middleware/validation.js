@@ -189,7 +189,7 @@ const paymentSchemas = {
     order_id: Joi.number().integer().positive().required(),
     amount: Joi.number().positive().precision(2).required(),
     payment_method: Joi.string().max(50).required(),
-    notes: Joi.string().max(500).optional()
+    notes: Joi.string().max(500).optional().allow(null, ''),
   }),
   
   updateStatus: Joi.object({

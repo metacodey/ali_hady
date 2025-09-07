@@ -40,6 +40,7 @@ class ApiServices {
   static String myOrders = "${server}orders/my";
   static String showOrder = "${server}orders/";
   static String addOrder = "${server}orders";
+  static String ordersIncomplete = "${server}orders/incomplete";
   static String updateOrderStatus = "${server}orders/";
   static String deleteOrder = "${server}orders/";
   static String ordersStats = "${server}orders/dashboard/stats";

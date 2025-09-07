@@ -36,7 +36,13 @@ class ListOrders extends GetView<OrdersController> {
                     controller.updateOrderStatus(order.id, newStatus);
                   },
                   onTap: () {
-                    _showOrderDetails(context, order);
+                    Get.toNamed(
+                      '/order/details',
+                      arguments: {'orderId': order.id},
+                    );
+                  },
+                  onPayment: () {
+                    Get.toNamed('/payments/add', arguments: {'order': order});
                   },
                 );
               });
@@ -72,35 +78,5 @@ class ListOrders extends GetView<OrdersController> {
       // التحميل التلقائي فقط
       return const SizedBox.shrink();
     });
-  }
-
-  void _showOrderDetails(BuildContext context, order) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('تفاصيل الطلب'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('رقم الطلب: #${order.orderNumber}'),
-            Text('اسم العميل: ${order.customerName}'),
-            Text('رقم الهاتف: ${order.customerPhone}'),
-            Text(
-                'المبلغ الإجمالي: ${order.totalAmount.toStringAsFixed(2)} ر.س'),
-            Text('عدد العناصر: ${order.itemsCount}'),
-            Text('الحالة: ${order.status}'),
-            if (order.createdAt != null)
-              Text('تاريخ الإنشاء: ${order.createdAt.toString()}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('إغلاق'),
-          ),
-        ],
-      ),
-    );
   }
 }

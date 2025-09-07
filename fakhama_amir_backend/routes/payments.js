@@ -316,11 +316,11 @@ router.post('/',
       
       // إنشاء الدفعة الجديدة
       const insertQuery = `
-        INSERT INTO payments (order_id, amount, payment_method, notes)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO payments (order_id, amount, payment_method, notes,status)
+        VALUES (?, ?, ?, ?,?)
       `;
       
-      const insertParams = [order_id, amount, payment_method, notes || null];
+      const insertParams = [order_id, amount, payment_method, notes || null,'paid'];
       const insertResult = await executeQuery(insertQuery, insertParams);
       
       if (!insertResult.success) {
