@@ -116,7 +116,22 @@ street_address: Joi.string().min(5).max(500).allow('').optional()
     latitude: Joi.number().min(-90).max(90).optional(),
     longitude: Joi.number().min(-180).max(180).optional()
   }),
-  
+   updateLocation: Joi.object({
+    city: Joi.string().min(2).max(50).required()
+      .messages({
+        'string.min': 'المدينة يجب أن تحتوي على حرفين على الأقل',
+        'any.required': 'المدينة مطلوبة'
+      }),
+    street_address: Joi.string().min(5).max(500).required()
+      .messages({
+        'string.min': 'العنوان يجب أن يحتوي على 5 أحرف على الأقل',
+        'any.required': 'العنوان مطلوب'
+      }),
+    country: Joi.string().max(50).optional(),
+    latitude: Joi.number().min(-90).max(90).optional(),
+    longitude: Joi.number().min(-180).max(180).optional()
+  }),
+
   login: Joi.object({
     email: Joi.string().email().required()
       .messages({

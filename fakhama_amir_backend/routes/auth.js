@@ -19,7 +19,7 @@ router.post('/customer/login',
   validate(customerSchemas.login),
   async (req, res) => {
     try {
-      console.log(req);
+      // console.log(req);
       const { email, password } = req.validatedData;
       
       // البحث عن العميل

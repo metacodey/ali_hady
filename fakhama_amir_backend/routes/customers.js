@@ -469,6 +469,81 @@ router.post('/',
   }
 );
 
+// PUT /api/customers/:id/location - تحديث بيانات الموقع للعميل
+router.put('/:id/location',
+  verifyToken,
+  checkUserType(['user', 'customer']),
+  validateParams(commonSchemas.id),
+  validate(customerSchemas.updateLocation),
+  async (req, res) => {
+    try {
+      const { id } = req.validatedParams;
+      const { city, street_address, country, latitude, longitude } = req.validatedData;
+      const { userType, userId } = req.user;
+      
+      // إذا كان العميل، تأكد من أنه يحدث بياناته فقط
+      if (userType === 'customer' && parseInt(userId) !== parseInt(id)) {
+        return res.status(403).json({
+          success: false,
+          message: 'غير مسموح لك بتحديث بيانات عميل آخر'
+        });
+      }
+      
+      // التحقق من وجود العميل
+      const checkQuery = 'SELECT id, full_name FROM customers WHERE id = ?';
+      const checkResult = await executeQuery(checkQuery, [id]);
+      
+      if (!checkResult.success || checkResult.data.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'العميل غير موجود'
+        });
+      }
+      
+      // إعداد البيانات للتحديث
+      const updateFields = [];
+      const updateParams = [];
+      
+      updateFields.push('city = ?', 'street_address = ?');
+      updateParams.push(city, street_address);
+      
+      if (country !== undefined) {
+        updateFields.push('country = ?');
+        updateParams.push(country);
+      }
+      
+      if (latitude !== undefined && longitude !== undefined) {
+        updateFields.push('latitude = ?', 'longitude = ?');
+        updateParams.push(latitude, longitude);
+      }
+      
+      updateFields.push('updated_at = NOW()');
+      updateParams.push(id);
+      
+      // تنفيذ التحديث
+      const updateQuery = `UPDATE customers SET ${updateFields.join(', ')} WHERE id = ?`;
+      const updateResult = await executeQuery(updateQuery, updateParams);
+      
+      if (!updateResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في تحديث بيانات الموقع'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: `تم تحديث بيانات الموقع للعميل ${checkResult.data[0].full_name} بنجاح`
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
 // PUT /api/customers/:id - تحديث بيانات العميل
 router.put('/:id',
   verifyToken,
