@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:fakhama_amir_app/features/payments/controllers/payment_controller.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../features/orders/controllers/orders_controller.dart';
@@ -33,24 +34,12 @@ class ConnectController extends GetxController {
   }
 
   Future<void> _fetchDataFromControllers() async {
-    // if (Get.isRegistered<ClientsController>()) {
-    //   await Get.find<ClientsController>().fetchData(hideLoading: true);
-    // }
-    // if (Get.isRegistered<ProductController>()) {
-    //   await Get.find<ProductController>().fetchData(hideLoading: true);
-    // }
-    // if (Get.isRegistered<MapAppController>()) {
-    //   await Get.find<MapAppController>().fetchData(hideLoading: true);
-    // }
+    if (Get.isRegistered<PaymentController>()) {
+      await Get.find<PaymentController>().fetchData(hideLoading: true);
+    }
     if (Get.isRegistered<OrdersController>()) {
       await Get.find<OrdersController>().fetchData(hideLoading: true);
     }
-    // if (Get.isRegistered<SettingController>()) {
-    //   await Get.find<SettingController>().getSetting();
-    // }
-    // if (Get.isRegistered<FavoritesController>()) {
-    //   await Get.find<FavoritesController>().getFavoriteProducts();
-    // }
   }
 
   @override

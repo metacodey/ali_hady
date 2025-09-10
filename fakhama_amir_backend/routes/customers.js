@@ -157,7 +157,7 @@ router.get('/map',
 // GET /api/customers/:id - عرض عميل واحد مع تفاصيل مالية كاملة
 router.get('/:id',
   verifyToken,
-  checkUserType(['user']),
+  checkUserType(['user','customer']),
   validateParams(commonSchemas.id),
   async (req, res) => {
     try {

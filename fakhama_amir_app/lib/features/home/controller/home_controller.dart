@@ -1,11 +1,17 @@
+import 'dart:developer';
+
 import 'package:fakhama_amir_app/core/class/preferences.dart';
+import 'package:fakhama_amir_app/features/auth/models/user_model.dart';
+import 'package:fakhama_amir_app/features/payments/screens/home_payments_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../../core/class/statusrequest.dart';
 import '../../../services/data/data_api.dart';
 import '../../../services/helper_function.dart';
+import '../../../services/location_worker.dart';
 import '../../orders/screens/home_orders_screen.dart';
 import '../model/navigtor_model.dart';
 
@@ -14,6 +20,7 @@ class HomeController extends GetxController {
   final DataApi dataApi = DataApi(Get.find());
   GlobalKey<ScaffoldState> drawer = GlobalKey();
   var pageIndex = 1.obs;
+  Placemark? placeMark;
 
   // حالة تحديث الموقع
   RxBool isUpdatingLocation = false.obs;
@@ -39,9 +46,7 @@ class HomeController extends GetxController {
       child: Text('1'),
     ),
     const HomeOrdersScreen(),
-    Center(
-      child: Text('3'),
-    ),
+    const HomePaymentsScreen(),
   ];
 
   void jumpToPage(int index) {
@@ -52,6 +57,29 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     getCurrentLocation();
+    getMyData();
+    // بدء تحديث الموقع الدوري
+    _startLocationWorker();
+  }
+
+  /// بدء عمل تحديث الموقع في الخلفية
+  Future<void> _startLocationWorker() async {
+    try {
+      await LocationWorker.startLocationUpdates();
+      Preferences.setBoolean('location_updates_active', true);
+    } catch (e) {
+      log('Error starting location worker: $e');
+    }
+  }
+
+  /// إيقاف عمل تحديث الموقع في الخلفية
+  Future<void> stopLocationWorker() async {
+    try {
+      await LocationWorker.stopLocationUpdates();
+      Preferences.setBoolean('location_updates_active', false);
+    } catch (e) {
+      log('Error stopping location worker: $e');
+    }
   }
 
   @override
@@ -82,6 +110,11 @@ class HomeController extends GetxController {
         timeLimit: const Duration(seconds: 10),
       );
 
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      placeMark = placemarks[0];
       currentPosition.value = position;
       isUpdatingLocation.value = false;
       updateLocation();
@@ -93,16 +126,33 @@ class HomeController extends GetxController {
   Future<void> updateLocation() async {
     var user = Preferences.getDataUser();
     Map<String, dynamic> locationData = {
-      "city": "بغداد", // يمكنك تحديث هذا ليكون ديناميكي
-      "street_address": "الموقع الحالي", // يمكنك تحسين هذا
-      "country": "العراق",
+      "city": placeMark?.locality ?? "", // يمكنك تحديث هذا ليكون ديناميكي
+      "street_address": placeMark?.street ?? "", // يمكنك تحسين هذا
+      "country": placeMark?.country ?? "",
       "latitude": currentPosition.value!.latitude,
       "longitude": currentPosition.value!.longitude
     };
     await handleRequestfunc(
+      hideLoading: true,
       apiCall: () async =>
           await dataApi.updateLocationCustomer(user!.id!, locationData),
       onSuccess: (res) {},
+      onError: showError,
+    );
+  }
+
+  Future<void> getMyData() async {
+    var user = Preferences.getDataUser();
+
+    await handleRequestfunc(
+      apiCall: () async => await dataApi.showCustomer(user!.id!),
+      hideLoading: true,
+      onSuccess: (res) {
+        var data = res['data'];
+        var model = UserModel.fromJson(data);
+        model = model.copyWith(token: user?.token ?? "");
+        Preferences.setDataUser(model);
+      },
       onError: showError,
     );
   }

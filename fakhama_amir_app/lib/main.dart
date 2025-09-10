@@ -13,9 +13,13 @@ import 'language/controller/localization_controller.dart';
 import 'theme/controller/theme_controller.dart';
 import 'theme/theme/dark_theme.dart';
 import 'theme/theme/light_theme.dart';
+import 'package:fakhama_amir_app/services/location_worker.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // تهيئة LocationWorker
+  await LocationWorker.initialize();
   Map<String, Map<String, String>> languages = await di.init();
   runApp(MyApp(
     languages: languages,

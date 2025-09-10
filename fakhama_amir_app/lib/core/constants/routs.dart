@@ -1,3 +1,4 @@
+import 'package:fakhama_amir_app/features/profile/screens/home_profile_screen.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/orders/screens/order_details_screen.dart';
@@ -21,11 +22,11 @@ List<GetPage<dynamic>> getPages = [
     binding: HomeBinding(),
     page: () => const OrderDetailsScreen(),
   ),
-  // GetPage(
-  //   name: "/client/add",
-  //   binding: HomeBinding(),
-  //   page: () => const AddEditClientScreen(),
-  // ),
+  GetPage(
+    name: "/client/profile",
+    binding: HomeBinding(),
+    page: () => const HomeProfileScreen(),
+  ),
   // GetPage(
   //   name: "/product/add",
   //   binding: HomeBinding(),

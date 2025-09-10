@@ -5,46 +5,27 @@ import 'package:mc_utils/mc_utils.dart';
 
 import '../../widgets/appbar_widget.dart';
 import '../../widgets/refresh_empty_widget.dart';
-import '../controllers/orders_controller.dart';
-import '../widgets/list_orders.dart';
-import '../widgets/search_orders.dart';
+import '../controllers/payment_controller.dart';
+import '../widgets/list_payments.dart';
+import '../widgets/search_payments.dart';
 
-class HomeOrdersScreen extends GetView<OrdersController> {
-  const HomeOrdersScreen({super.key});
+class HomePaymentsScreen extends GetView<PaymentController> {
+  const HomePaymentsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppbarWidget(
-        title: "orders".tr,
+        title: "الدفعات",
         appBarWidth: 40.w,
         showWidget: false,
-        children: [
-          McCardItem(
-            onTap: () {
-              Get.toNamed('/client/profile');
-            },
-            color: Colors.blue.withOpacity(0.2),
-            showShdow: false,
-            colorBorder: Colors.blue,
-            widthBorder: 1,
-            radius: BorderRadius.circular(5),
-            padding: EdgeInsets.all(5.r),
-            child: const Icon(
-              Icons.person,
-              color: Colors.blue,
-            ),
-          ),
-          SizedBox(
-            width: 10.w,
-          ),
-        ],
+        children: const [],
       ),
       body: Column(
         children: [
           Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-              child: const SearchOrders()),
+              child: const SearchPayments()),
           _buildPaginationInfo(),
           Expanded(
             child: Obx(
@@ -63,17 +44,17 @@ class HomeOrdersScreen extends GetView<OrdersController> {
                     controller: controller.scroller,
                   );
                 }
-                if (controller.filteredOrders.isEmpty &&
+                if (controller.filteredPayments.isEmpty &&
                     !controller.statusRequest.value.isLoading) {
                   return RefreshEmptyWidget(
                     onRefresh: controller.fetchData,
-                    emptyText: "no_orders_found".tr,
-                    value: "start_adding_first_orders".tr,
-                    icon: Icons.receipt_long_outlined,
+                    emptyText: "لا توجد دفعات",
+                    value: "لم يتم العثور على أي دفعات",
+                    icon: Icons.payment_outlined,
                     controller: controller.scroller,
                   );
                 }
-                return const ListOrders();
+                return const ListPayments();
               },
             ),
           ),
@@ -92,7 +73,7 @@ class HomeOrdersScreen extends GetView<OrdersController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'عرض ${controller.orders.length} من ${controller.totalItems.value}',
+              'عرض ${controller.payments.length} من ${controller.totalItems.value}',
               style: TextStyle(
                 fontSize: 12.sp,
                 color: Colors.grey[600],

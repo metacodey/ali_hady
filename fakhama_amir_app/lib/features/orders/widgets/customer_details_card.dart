@@ -42,11 +42,11 @@ class CustomerDetailsCard extends StatelessWidget {
           _buildInfoRow(
               Icons.phone_outlined, 'رقم الهاتف', order.customerPhone),
           SizedBox(height: 8.h),
-          _buildInfoRow(
-              Icons.location_city_outlined, 'المدينة', order.customerCity),
-          SizedBox(height: 8.h),
-          _buildInfoRow(
-              Icons.location_on_outlined, 'العنوان', order.customerAddress),
+          // _buildInfoRow(
+          //     Icons.location_city_outlined, 'المدينة', order.customerCity),
+          // SizedBox(height: 8.h),
+          // _buildInfoRow(
+          //     Icons.location_on_outlined, 'العنوان', order.customerAddress),
           if (order.customerNotes != null) ...[
             SizedBox(height: 8.h),
             _buildInfoRow(

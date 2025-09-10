@@ -36,6 +36,7 @@ dependencies:
     path: libraries/geolocator/
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
+  workmanager: ^0.7.0
 
 
   

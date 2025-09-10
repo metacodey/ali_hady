@@ -61,7 +61,6 @@ class OrderDetailsScreen extends GetView<OrderDetailsController> {
                 totalAmount: order.totalAmount,
                 paidAmount: order.paidAmount,
                 remainingAmount: order.remainingAmount,
-                onAddPayment: () => _showAddPaymentDialog(context, order.id),
               ),
 
               SizedBox(height: 16.h),
@@ -158,88 +157,5 @@ class OrderDetailsScreen extends GetView<OrderDetailsController> {
     } else {
       return Colors.red;
     }
-  }
-
-  void _showAddPaymentDialog(BuildContext context, int orderId) {
-    final amountController = TextEditingController();
-    final notesController = TextEditingController();
-    String selectedMethod = 'نقداً';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        title: Text(
-          'إضافة دفعة جديدة',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'المبلغ',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 12.h),
-            DropdownButtonFormField<String>(
-              value: selectedMethod,
-              decoration: const InputDecoration(
-                labelText: 'طريقة الدفع',
-                border: OutlineInputBorder(),
-              ),
-              items: ['نقداً', 'بطاقة ائتمان', 'تحويل بنكي']
-                  .map((method) => DropdownMenuItem(
-                        value: method,
-                        child: Text(method),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) selectedMethod = value;
-              },
-            ),
-            SizedBox(height: 12.h),
-            TextField(
-              controller: notesController,
-              decoration: const InputDecoration(
-                labelText: 'ملاحظات (اختياري)',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (amountController.text.isNotEmpty) {
-                final paymentData = {
-                  'amount': double.parse(amountController.text),
-                  'payment_method': selectedMethod,
-                  'notes': notesController.text.isEmpty
-                      ? null
-                      : notesController.text,
-                };
-                controller.addPayment(orderId, paymentData);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('إضافة'),
-          ),
-        ],
-      ),
-    );
   }
 }

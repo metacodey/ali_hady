@@ -1,8 +1,10 @@
+import 'package:fakhama_amir_app/features/profile/cntrollers/profile_cntroller.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../features/auth/controllers/login_controller.dart';
 import '../../features/home/controller/home_controller.dart';
 import '../../features/orders/controllers/order_details_controller.dart';
 import '../../features/orders/controllers/orders_controller.dart';
+import '../../features/payments/controllers/payment_controller.dart';
 import '../../services/api/api_client.dart';
 
 class HomeBinding implements Bindings {
@@ -14,8 +16,8 @@ class HomeBinding implements Bindings {
     Get.lazyPut(() => LoginController());
     Get.lazyPut(() => OrdersController());
     Get.lazyPut(() => OrderDetailsController());
-    // Get.lazyPut(() => ClientsController());
-    // Get.lazyPut(() => AddEditClientController());
+    Get.lazyPut(() => ProfileCntroller());
+    Get.lazyPut(() => PaymentController());
     // Get.lazyPut(() => MapAppController());
     // Get.lazyPut(() => ProductController());
     // Get.lazyPut(() => AddEditProductController());

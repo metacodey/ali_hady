@@ -49,6 +49,7 @@ class ApiServices {
 
   // Payment endpoints
   static String paymentsList = "${server}payments";
+  static String myPayments = "${server}payments/my";
   static String orderPayments = "${server}payments/order/";
   static String showPayment = "${server}payments/";
   static String addPayment = "${server}payments";

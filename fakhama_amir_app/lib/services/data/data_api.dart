@@ -39,10 +39,10 @@ class DataApi {
   }
 
   showCustomer(int customerId) async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.showCustomer}$customerId",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.showCustomer}$customerId",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -394,10 +394,18 @@ class DataApi {
   }
 
   getPaymentMethods() async {
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: ApiServices.paymentMethods,
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.paymentMethods,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  getMyPayments() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.myPayments,
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 

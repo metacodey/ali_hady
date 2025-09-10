@@ -10,7 +10,6 @@ class OrderPaymentsWidget extends StatelessWidget {
   final double totalAmount;
   final double paidAmount;
   final double remainingAmount;
-  final VoidCallback? onAddPayment;
 
   const OrderPaymentsWidget({
     super.key,
@@ -18,7 +17,6 @@ class OrderPaymentsWidget extends StatelessWidget {
     required this.totalAmount,
     required this.paidAmount,
     required this.remainingAmount,
-    this.onAddPayment,
   });
 
   @override
@@ -50,20 +48,6 @@ class OrderPaymentsWidget extends StatelessWidget {
                   color: Colors.grey.shade800,
                 ),
               ),
-              if (remainingAmount > 0 && onAddPayment != null)
-                ElevatedButton.icon(
-                  onPressed: onAddPayment,
-                  icon: Icon(Icons.add, size: 16.sp),
-                  label: const Text('إضافة دفعة'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                  ),
-                ),
             ],
           ),
           SizedBox(height: 12.h),
