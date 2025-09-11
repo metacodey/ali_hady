@@ -7,7 +7,7 @@ const { verifyToken, checkUserType, verifyCustomer } = require('../middleware/au
 // GET /api/messages/conversation/:conversationId - رسائل محادثة معينة
 router.get('/conversation/:conversationId',
   verifyToken,
-  validateParams({ conversationId: require('joi').number().integer().positive().required() }),
+  validateParams(messageSchemas.conversationParams),
   validateQuery(commonSchemas.pagination),
   async (req, res) => {
     try {
@@ -40,25 +40,25 @@ router.get('/conversation/:conversationId',
         });
       }
       
-      // استرداد رسائل المحادثة
-      const baseQuery = `
-        SELECT 
-          m.id, m.message, m.sender_type, m.is_read, m.created_at,
-          CASE 
-            WHEN m.sender_type = 'customer' THEN c.full_name
-            WHEN m.sender_type = 'user' THEN u.full_name
-            ELSE 'غير معروف'
-          END as sender_name
-        FROM messages m
-        LEFT JOIN customers c ON m.sender_type = 'customer' AND m.sender_id = c.id
-        LEFT JOIN users u ON m.sender_type = 'user' AND m.sender_id = u.id
-        WHERE m.conversation_id = ?
-      `;
+     // استرداد رسائل المحادثة
+        const baseQuery = `
+          SELECT 
+            m.id, m.message, m.sender_type, m.sender_id, m.is_read, m.created_at,
+            CASE 
+              WHEN m.sender_type = 'customer' THEN c.full_name
+              WHEN m.sender_type = 'user' THEN u.full_name
+              ELSE 'غير معروف'
+            END as sender_name
+          FROM messages m
+          LEFT JOIN customers c ON m.sender_type = 'customer' AND m.sender_id = c.id
+          LEFT JOIN users u ON m.sender_type = 'user' AND m.sender_id = u.id
+          WHERE m.conversation_id = ?
+        `;
       
       const countQuery = 'SELECT COUNT(*) as total FROM messages WHERE conversation_id = ?';
       
       const result = await getPaginatedData(
-        baseQuery + ' ORDER BY m.created_at ASC',
+        baseQuery + ' ORDER BY m.id DESC',
         countQuery,
         [conversationId],
         page,
@@ -139,6 +139,14 @@ router.post('/',
         return res.status(400).json({
           success: false,
           message: 'المحادثة مغلقة، لا يمكن إرسال رسائل جديدة'
+        });
+      }
+      // التحقق من أن المحادثة مفتوحة
+
+       if (conversation.status === 'pending' && userType === 'customer') {
+        return res.status(400).json({
+          success: false,
+          message: 'يرجى الأنتظار. حتى يقوم الدعم  بقبول محادثتك'
         });
       }
       
@@ -420,9 +428,7 @@ router.get('/unread/count',
 // POST /api/messages/mark-all-read - تحديد جميع رسائل محادثة كمقروءة
 router.post('/mark-all-read',
   verifyToken,
-  validate(require('joi').object({
-    conversation_id: require('joi').number().integer().positive().required()
-  })),
+validate(messageSchemas.markAllRead),
   async (req, res) => {
     try {
       const { conversation_id } = req.validatedData;

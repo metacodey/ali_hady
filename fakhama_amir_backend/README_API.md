@@ -895,7 +895,6 @@ Authorization: Bearer <user_token>
 DELETE /api/users/5
 ```
 
----
 
 ## 💬 7. APIs المحادثات (Conversations)
 
@@ -1047,6 +1046,158 @@ Response:
     "today_conversations": 8,
     "unassigned_conversations": 5,
     "total_unread_messages": 15
+  }
+}
+```
+## 8. واجهة برمجة تطبيقات الرسائل (Messages API)
+
+### 8.1 جلب رسائل محادثة معينة
+```http
+GET /api/messages/conversation/:conversationId
+Authorization: Bearer <token>
+
+Query Parameters:
+- page: number (اختياري، افتراضي 1)
+- limit: number (اختياري، افتراضي 10)
+
+مثال:
+GET /api/messages/conversation/5?page=1&limit=20
+
+Response:
+{
+  "success": true,
+  "message": "تم استرداد رسائل المحادثة بنجاح",
+  "data": [
+    {
+      "id": 1,
+      "message": "مرحبا، لدي استفسار حول الطلب",
+      "sender_type": "customer",
+      "is_read": 1,
+      "created_at": "2025-09-12T10:30:00.000Z",
+      "sender_name": "أحمد محمد"
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 3,
+    "totalItems": 25
+  },
+  "conversation": {
+    "id": 5,
+    "customer_id": 1,
+    "customer_name": "أحمد محمد"
+  }
+}
+```
+
+### 8.2 إرسال رسالة جديدة
+```http
+POST /api/messages
+Authorization: Bearer <token>
+Content-Type: application/json
+
+Body:
+{
+  "conversation_id": 5,
+  "message": "شكراً لك على الرد السريع"
+}
+
+Response:
+{
+  "success": true,
+  "message": "تم إرسال الرسالة بنجاح",
+  "data": {
+    "id": 15,
+    "conversation_id": 5,
+    "message": "شكراً لك على الرد السريع"
+  }
+}
+```
+
+### 8.3 عرض رسالة واحدة
+```http
+GET /api/messages/:id
+Authorization: Bearer <token>
+
+مثال:
+GET /api/messages/15
+
+Response:
+{
+  "success": true,
+  "data": {
+    "id": 15,
+    "conversation_id": 5,
+    "message": "شكراً لك على الرد السريع",
+    "sender_type": "customer",
+    "sender_name": "أحمد محمد",
+    "is_read": 1,
+    "created_at": "2025-09-12T10:45:00.000Z"
+  }
+}
+```
+
+### 8.4 تحديد رسالة كمقروءة
+```http
+PUT /api/messages/:id/read
+Authorization: Bearer <token>
+
+مثال:
+PUT /api/messages/15/read
+
+Response:
+{
+  "success": true,
+  "message": "تم تحديد الرسالة كمقروءة"
+}
+```
+
+### 8.5 حذف رسالة (للمشرفين فقط)
+```http
+DELETE /api/messages/:id
+Authorization: Bearer <user_token>
+
+مثال:
+DELETE /api/messages/15
+
+Response:
+{
+  "success": true,
+  "message": "تم حذف الرسالة بنجاح"
+}
+```
+
+### 8.6 عدد الرسائل غير المقروءة
+```http
+GET /api/messages/unread/count
+Authorization: Bearer <token>
+
+Response:
+{
+  "success": true,
+  "data": {
+    "unread_count": 5
+  }
+}
+```
+
+### 8.7 تحديد جميع رسائل محادثة كمقروءة
+```http
+POST /api/messages/mark-all-read
+Authorization: Bearer <token>
+Content-Type: application/json
+
+Body:
+{
+  "conversation_id": 5
+}
+
+Response:
+{
+  "success": true,
+  "message": "تم تحديد جميع الرسائل كمقروءة",
+  "data": {
+    "updated_count": 3
   }
 }
 ```

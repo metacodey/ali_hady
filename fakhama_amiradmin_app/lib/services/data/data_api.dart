@@ -562,4 +562,75 @@ class DataApi {
         method: "GET");
     return res.fold((lef) => lef, (re) => re);
   }
+
+  // Message Methods
+  getConversationMessages(int conversationId,
+      {int page = 1, int limit = 10}) async {
+    Map<String, String> queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+
+    String queryString = queryParams.entries
+        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.conversationMessages}$conversationId?$queryString",
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  addMessage(Map<String, dynamic> data) async {
+    var res = await apiReq.sendJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.addMessage,
+      data: data,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  showMessage(int messageId) async {
+    var res = await apiReq.dynamicData(
+        headers: _headerWithToken() ?? {},
+        url: "${ApiServices.showMessage}$messageId",
+        method: "GET");
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  markMessageAsRead(int messageId) async {
+    var res = await apiReq.updateJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.markMessageRead}$messageId/read",
+      data: {},
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  deleteMessage(int messageId) async {
+    var res = await apiReq.deleteData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.deleteMessage}$messageId",
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  getUnreadMessagesCount() async {
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.unreadMessagesCount,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
+  markAllMessagesAsRead(Map<String, dynamic> data) async {
+    var res = await apiReq.sendJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.markAllMessagesRead,
+      data: data,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
 }
+

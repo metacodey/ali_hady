@@ -1,6 +1,9 @@
 import 'package:fakhama_amir_app/features/profile/cntrollers/profile_cntroller.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../features/auth/controllers/login_controller.dart';
+import '../../features/conversations/controllers/add_conversation_controller.dart';
+import '../../features/conversations/controllers/chat_controller.dart';
+import '../../features/conversations/controllers/conversation_controller.dart';
 import '../../features/home/controller/home_controller.dart';
 import '../../features/orders/controllers/order_details_controller.dart';
 import '../../features/orders/controllers/orders_controller.dart';
@@ -18,9 +21,9 @@ class HomeBinding implements Bindings {
     Get.lazyPut(() => OrderDetailsController());
     Get.lazyPut(() => ProfileCntroller());
     Get.lazyPut(() => PaymentController());
-    // Get.lazyPut(() => MapAppController());
-    // Get.lazyPut(() => ProductController());
-    // Get.lazyPut(() => AddEditProductController());
+    Get.lazyPut(() => ConversationController());
+    Get.lazyPut(() => AddConversationController());
+    Get.lazyPut(() => ChatController());
     // Get.lazyPut(() => AddEditOrdersController());
 
     // Get.lazyPut(() => PaymentController());

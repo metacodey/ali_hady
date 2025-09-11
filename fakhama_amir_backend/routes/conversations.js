@@ -309,7 +309,7 @@ router.put('/:id/assign',
 // PUT /api/conversations/:id/status - تحديث حالة المحادثة
 router.put('/:id/status',
   verifyToken,
-  checkUserType(['user']),
+  checkUserType(['user','customer']),
   validateParams(commonSchemas.id),
   validate(require('joi').object({
     status: require('joi').string().valid('open', 'closed').required()

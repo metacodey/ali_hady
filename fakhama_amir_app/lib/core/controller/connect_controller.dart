@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:fakhama_amir_app/features/payments/controllers/payment_controller.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:mc_utils/mc_utils.dart';
+import '../../features/conversations/controllers/conversation_controller.dart';
 import '../../features/orders/controllers/orders_controller.dart';
 import '../class/preferences.dart';
 
@@ -39,6 +40,9 @@ class ConnectController extends GetxController {
     }
     if (Get.isRegistered<OrdersController>()) {
       await Get.find<OrdersController>().fetchData(hideLoading: true);
+    }
+    if (Get.isRegistered<ConversationController>()) {
+      await Get.find<ConversationController>().fetchData(hideLoading: true);
     }
   }
 

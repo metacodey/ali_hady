@@ -76,4 +76,14 @@ class ApiServices {
   static String updateConversationStatus = "${server}conversations/";
   static String deleteConversation = "${server}conversations/";
   static String conversationsStats = "${server}conversations/dashboard/stats";
+
+  // Message endpoints
+  static String messagesList = "${server}messages";
+  static String conversationMessages = "${server}messages/conversation/";
+  static String showMessage = "${server}messages/";
+  static String addMessage = "${server}messages";
+  static String markMessageRead = "${server}messages/";
+  static String deleteMessage = "${server}messages/";
+  static String unreadMessagesCount = "${server}messages/unread/count";
+  static String markAllMessagesRead = "${server}messages/mark-all-read";
 }

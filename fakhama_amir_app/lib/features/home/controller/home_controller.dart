@@ -12,6 +12,7 @@ import '../../../core/class/statusrequest.dart';
 import '../../../services/data/data_api.dart';
 import '../../../services/helper_function.dart';
 import '../../../services/location_worker.dart';
+import '../../conversations/screens/home_conversations_screen.dart';
 import '../../orders/screens/home_orders_screen.dart';
 import '../model/navigtor_model.dart';
 
@@ -29,7 +30,7 @@ class HomeController extends GetxController {
   List<NavigatorModel> items = [
     NavigatorModel(
       title: 'chat',
-      icon: LucideIcons.chefHat,
+      icon: Icons.chat,
     ),
     NavigatorModel(
       title: 'orders', // الطلبات
@@ -42,9 +43,7 @@ class HomeController extends GetxController {
   ];
 
   List<Widget> screens = [
-    Center(
-      child: Text('1'),
-    ),
+    const HomeConversationsScreen(),
     const HomeOrdersScreen(),
     const HomePaymentsScreen(),
   ];

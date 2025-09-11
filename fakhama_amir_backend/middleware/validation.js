@@ -221,6 +221,7 @@ const conversationSchemas = {
 };
 
 // Schemas للرسائل
+// في messageSchemas أضف هذين
 const messageSchemas = {
   create: Joi.object({
     conversation_id: Joi.number().integer().positive().required(),
@@ -228,9 +229,18 @@ const messageSchemas = {
       .messages({
         'any.required': 'نص الرسالة مطلوب'
       })
+  }),
+
+  // أضف هذا الجديد
+  conversationParams: Joi.object({
+    conversationId: Joi.number().integer().positive().required()
+  }),
+
+  // أضف هذا أيضاً
+  markAllRead: Joi.object({
+    conversation_id: Joi.number().integer().positive().required()
   })
 };
-
 // Schema للمعاملات العامة
 const commonSchemas = {
   id: Joi.object({

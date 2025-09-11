@@ -4,8 +4,7 @@ const bcrypt = require('bcryptjs');
 const { executeQuery, getPaginatedData } = require('../config/database');
 const { validate, validateParams, validateQuery, customerSchemas, commonSchemas } = require('../middleware/validation');
 const { verifyToken, checkUserType } = require('../middleware/auth');
-
-// GET /api/customers - عرض جميع العملاء مع المبلغ المتبقي (للمشرفين فقط)
+// GET /api/customers - عرض جميع العملاء مع المبلغ المتبقي والمحادثات (للمشرفين فقط)
 router.get('/', 
   verifyToken,
   checkUserType(['user']),
@@ -21,7 +20,11 @@ router.get('/',
           COALESCE(order_totals.total_orders, 0) as total_orders,
           COALESCE(order_totals.total_amount, 0.00) as total_amount,
           COALESCE(payment_totals.total_paid, 0.00) as total_paid,
-          COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount
+          COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount,
+          COALESCE(conversation_totals.total_conversations, 0) as total_conversations,
+          COALESCE(conversation_totals.open_conversations, 0) as open_conversations,
+          COALESCE(conversation_totals.unread_messages_from_customer, 0) as unread_messages_from_customer,
+          conversation_totals.last_message_date
         FROM customers c
         LEFT JOIN (
           SELECT 
@@ -39,6 +42,17 @@ router.get('/',
           LEFT JOIN payments p ON o.id = p.order_id
           GROUP BY o.customer_id
         ) payment_totals ON c.id = payment_totals.customer_id
+        LEFT JOIN (
+          SELECT 
+            conv.customer_id,
+            COUNT(*) as total_conversations,
+            COUNT(CASE WHEN conv.status = 'open' THEN 1 END) as open_conversations,
+            COUNT(CASE WHEN m.sender_type = 'customer' AND m.is_read = 0 THEN 1 END) as unread_messages_from_customer,
+            MAX(m.created_at) as last_message_date
+          FROM conversations conv
+          LEFT JOIN messages m ON conv.id = m.conversation_id
+          GROUP BY conv.customer_id
+        ) conversation_totals ON c.id = conversation_totals.customer_id
       `;
       
       let countQuery = 'SELECT COUNT(*) as total FROM customers c';
@@ -64,7 +78,7 @@ router.get('/',
         });
       }
       
-      // تنسيق البيانات لإظهار المبالغ بشكل واضح
+      // تنسيق البيانات لإظهار المبالغ والمحادثات بشكل واضح
       const formattedData = result.data.map(customer => ({
         ...customer,
         financial_summary: {
@@ -73,6 +87,14 @@ router.get('/',
           total_paid: parseFloat(customer.total_paid),
           remaining_amount: parseFloat(customer.remaining_amount),
           payment_status: customer.remaining_amount > 0 ? 'has_debt' : 'paid_up'
+        },
+        conversations_summary: {
+          total_conversations: customer.total_conversations,
+          open_conversations: customer.open_conversations,
+          unread_messages_from_customer: customer.unread_messages_from_customer,
+          last_message_date: customer.last_message_date,
+          has_active_conversations: customer.open_conversations > 0,
+          needs_admin_attention: customer.unread_messages_from_customer > 0
         }
       }));
       
@@ -91,7 +113,6 @@ router.get('/',
     }
   }
 );
-
 // GET /api/customers/map - عرض جميع العملاء مع المبلغ المتبقي على الخريطة
 router.get('/map', 
  verifyToken,
