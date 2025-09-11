@@ -48,7 +48,7 @@ class SocketManager {
     this.connectedUsers.set(socket.userId, {
       socketId: socket.id,
       userType: socket.userType,
-      userId:socket.userId,
+      userId: socket.userId,
       conversationId: null
     });
 
@@ -62,7 +62,7 @@ class SocketManager {
     socket.on('mark_message_read', this.handleReadMessage.bind(this, socket));
     socket.on('new_conversation_created', this.handleNewConversationCreated.bind(this, socket));
     socket.on('update_conversation_status', this.handleUpdateConversationStatus.bind(this, socket));
-    socket.on('disconnect', this.handleDisconnect.bind(this));
+    socket.on('disconnect', this.handleDisconnect.bind(this, socket));
   }
   
   // معالجة إنشاء محادثة جديدة
@@ -116,16 +116,6 @@ class SocketManager {
     } catch (error) {
       console.error('❌ Error in handleUpdateConversationStatus:', error);
       socket.emit('error', { message: 'خطأ في تحديث حالة المحادثة' });
-    }
-  }
-  
-  // إشعار المشرفين (تحديث للتعامل مع نوع المستخدم الصحيح)
-  notifyAdmins(event, data) {
-    // إرسال إشعار لجميع المشرفين المتصلين
-    for (const [userId, userData] of this.connectedUsers) {
-      if (userData.userType === 'admin') { // تصحيح: admin بدلاً من user
-        this.io.to(userData.socketId).emit(event, data);
-      }
     }
   }
 
@@ -203,13 +193,11 @@ class SocketManager {
       console.error('Error leaving conversation:', error);
     }
   }
-  // الانضمام إلى محادثة
+
   // معالجة إرسال الرسائل
   async handleSendMessage(socket, data) {
     try {
       const { conversation_id, reciver_id } = data;
-      // console.log(data);
-      
       // البحث عن المستقبل في المستخدمين المتصلين
       const receiverData = this.connectedUsers.get(reciver_id);
       if (receiverData) {
@@ -233,6 +221,7 @@ class SocketManager {
       socket.emit('error', { message: 'خطأ في إرسال الرسالة' });
     }
   }
+
   async handleReadMessage(socket, data) {
     try {
       const { id, conversation_id, reciver_id, reader_id, reader_type } = data;
@@ -266,6 +255,7 @@ class SocketManager {
       socket.emit('error', { message: 'خطأ في معالجة إشعار القراءة' });
     }
   }
+
   // قطع الاتصال
   handleDisconnect(socket) {
     console.log(`👋 User disconnected: ${socket.userId}`);
@@ -318,11 +308,11 @@ class SocketManager {
     console.log(`🔄 Conversation update notification sent for ${conversationId}`);
   }
 
-  // إشعار المشرفين
+  // إشعار المشرفين - تم إصلاح الخطأ هنا
   notifyAdmins(event, data) {
     // إرسال إشعار لجميع المشرفين المتصلين
     for (const [userId, userData] of this.connectedUsers) {
-      if (userData.userType === 'user') {
+      if (userData.userType === 'admin') { // تصحيح: admin بدلاً من user
         this.io.to(userData.socketId).emit(event, data);
       }
     }

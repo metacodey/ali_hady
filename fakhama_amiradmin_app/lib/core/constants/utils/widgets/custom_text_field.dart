@@ -31,41 +31,43 @@ class CustomTextField extends StatefulWidget {
   final Color? fillColor;
   final bool showFillColor;
   final bool shadow;
+  final bool unFucos;
+
   final BorderRadius? radius;
   final BorderSide? borderSide;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? paddingLable;
 
-  const CustomTextField({
-    super.key,
-    // المعاملات الأساسية
-    this.controller,
-    this.focusNode,
-    this.label,
-    this.hintText,
-    this.keyboardType,
-    this.validator,
-    this.onChanged,
+  const CustomTextField(
+      {super.key,
+      // المعاملات الأساسية
+      this.controller,
+      this.focusNode,
+      this.label,
+      this.hintText,
+      this.keyboardType,
+      this.validator,
+      this.onChanged,
 
-    // إعدادات النص
-    this.obscureText = false,
-    this.readOnly = false,
-    this.maxline = 1,
-    this.minline,
-    this.maxLength,
-    this.isNext = false,
+      // إعدادات النص
+      this.obscureText = false,
+      this.readOnly = false,
+      this.maxline = 1,
+      this.minline,
+      this.maxLength,
+      this.isNext = false,
 
-    // إعدادات التصميم
-    this.suffixIcon,
-    this.prefixIcon,
-    this.fillColor,
-    this.showFillColor = false,
-    this.shadow = false,
-    this.radius,
-    this.borderSide,
-    this.padding,
-    this.paddingLable,
-  });
+      // إعدادات التصميم
+      this.suffixIcon,
+      this.prefixIcon,
+      this.fillColor,
+      this.showFillColor = false,
+      this.shadow = false,
+      this.radius,
+      this.borderSide,
+      this.padding,
+      this.paddingLable,
+      this.unFucos = true});
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -248,7 +250,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       // معالجات الأحداث
       validator: widget.validator,
       onChanged: _handleTextChanged,
-      onTapOutside: _handleTapOutside,
+      onTapOutside: widget.unFucos ? _handleTapOutside : null,
 
       // التصميم
       style: _getTextStyle(),

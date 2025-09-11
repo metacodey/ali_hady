@@ -24,6 +24,7 @@ class ChatController extends GetxController {
   Rx<StatusRequest> statusRequest = StatusRequest.none.obs;
   Rx<StatusRequest> statusSendMessage = StatusRequest.none.obs;
   Rx<StatusRequest> statusLoadMore = StatusRequest.none.obs;
+  final FocusNode inputFocus = FocusNode();
 
   // بيانات المحادثة
   Rx<ConversationModel?> conversation = Rx<ConversationModel?>(null);

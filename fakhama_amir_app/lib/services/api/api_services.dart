@@ -1,7 +1,8 @@
 class ApiServices {
-  static String server = "http://192.168.1.71:3000/api/";
-  static String serverSocket = "http://192.168.1.71:3000";
-
+  static String server =
+      "https://alamir.fawtrasmart.com/api/"; //"http://192.168.1.71:3000/api/";
+  static String serverSocket = "https://alamir.fawtrasmart.com";
+  //"http://192.168.1.71:3000";
   static const headers = {
     'Accept': 'application/json',
     'Content-type': 'application/json',

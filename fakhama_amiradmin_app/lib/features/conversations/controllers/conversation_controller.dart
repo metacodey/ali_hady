@@ -28,6 +28,7 @@ class ConversationController extends GetxController {
   // متغيرات البحث والفلترة
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
+
   RxString searchQuery = ''.obs;
   Rx<String?> selectedStatus = Rx<String?>(null);
 

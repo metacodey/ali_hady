@@ -26,6 +26,7 @@ class ChatController extends GetxController {
   Rx<StatusRequest> statusRequest = StatusRequest.none.obs;
   Rx<StatusRequest> statusSendMessage = StatusRequest.none.obs;
   Rx<StatusRequest> statusLoadMore = StatusRequest.none.obs;
+  final FocusNode inputFocus = FocusNode();
 
   // بيانات المحادثة
   Rx<ConversationModel?> conversation = Rx<ConversationModel?>(null);
@@ -304,6 +305,7 @@ class ChatController extends GetxController {
     if (messageController.text.trim().isEmpty || conversation.value == null) {
       return;
     }
+    inputFocus.requestFocus();
     var user = Preferences.getDataUser();
     final messageText = messageController.text.trim();
 

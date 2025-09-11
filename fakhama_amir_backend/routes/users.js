@@ -13,12 +13,12 @@ const userSchemas = {
     email: Joi.string().email().max(100).required(),
     password: Joi.string().min(6).max(128).required(),
     full_name: Joi.string().min(2).max(100).required(),
-    phone: Joi.string().pattern(/^\+966[0-9]{9}$/).optional()
+    phone: Joi.string().pattern(/^\+964[0-9]{9}$/).optional()
   }),
   
   update: Joi.object({
     full_name: Joi.string().min(2).max(100).optional(),
-    phone: Joi.string().pattern(/^\+966[0-9]{9}$/).optional(),
+    phone: Joi.string().pattern(/^\+964[0-9]{9}$/).optional(),
     is_active: Joi.boolean().optional()
   })
 };

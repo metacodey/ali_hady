@@ -34,6 +34,8 @@ class MessageInput extends GetView<ChatController> {
               child: CustomTextField(
                 controller: controller.messageController,
                 hintText: 'اكتب رسالة...',
+                focusNode: controller.inputFocus,
+                unFucos: false,
                 padding: EdgeInsets.symmetric(
                   horizontal: 16.w,
                   vertical: 10.h,
