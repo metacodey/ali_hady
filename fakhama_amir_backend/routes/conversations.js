@@ -195,6 +195,89 @@ router.get('/:id',
   }
 );
 
+// GET /api/conversations/customer/:customerId - عرض جميع محادثات عميل معين (للمشرفين فقط)
+router.get('/customer/:customerId',
+  verifyToken,
+  checkUserType(['user']),
+   validateParams(conversationSchemas.customerParams),
+  validateQuery(commonSchemas.pagination),
+  async (req, res) => {
+    try {
+      const { customerId } = req.validatedParams;
+      const { page, limit } = req.validatedQuery;
+      
+      // التحقق من وجود العميل
+      const customerCheckQuery = 'SELECT id, full_name FROM customers WHERE id = ?';
+      const customerCheckResult = await executeQuery(customerCheckQuery, [customerId]);
+      
+      if (!customerCheckResult.success || customerCheckResult.data.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'العميل غير موجود'
+        });
+      }
+      
+      // استعلام محادثات العميل مع معلومات إضافية
+      const baseQuery = `
+        SELECT 
+          conv.id, conv.subject, conv.status, conv.created_at, conv.updated_at,
+          c.full_name as customer_name, c.email as customer_email,
+          u.full_name as assigned_user,
+          COUNT(m.id) as total_messages,
+          COUNT(CASE WHEN m.sender_type = 'customer' AND m.is_read = 0 THEN 1 END) as unread_from_customer,
+          MAX(m.created_at) as last_message_date,
+          (SELECT message FROM messages WHERE conversation_id = conv.id ORDER BY created_at DESC LIMIT 1) as last_message
+        FROM conversations conv
+        JOIN customers c ON conv.customer_id = c.id
+        LEFT JOIN users u ON conv.user_id = u.id
+        LEFT JOIN messages m ON conv.id = m.conversation_id
+        WHERE conv.customer_id = ?
+        GROUP BY conv.id
+      `;
+      
+      const countQuery = 'SELECT COUNT(*) as total FROM conversations WHERE customer_id = ?';
+      
+      const result = await getPaginatedData(
+        baseQuery + ' ORDER BY conv.updated_at DESC',
+        countQuery,
+        [customerId],
+        page,
+        limit
+      );
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في استرداد محادثات العميل'
+        });
+      }
+      
+      // تنسيق البيانات
+      const formattedData = result.data.map(conversation => ({
+        ...conversation,
+        total_messages: parseInt(conversation.total_messages),
+        unread_from_customer: parseInt(conversation.unread_from_customer),
+        needs_attention: conversation.unread_from_customer > 0,
+        is_active: conversation.status === 'open'
+      }));
+      
+      res.json({
+        success: true,
+        message: 'تم استرداد محادثات العميل بنجاح',
+        data: formattedData,
+        pagination: result.pagination,
+        customer: customerCheckResult.data[0]
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
 // POST /api/conversations - إنشاء محادثة جديدة (للعملاء)
 router.post('/',
   verifyToken,

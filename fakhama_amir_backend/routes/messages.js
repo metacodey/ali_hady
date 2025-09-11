@@ -135,7 +135,7 @@ router.post('/',
       const conversation = conversationCheckResult.data[0];
       
       // التحقق من أن المحادثة مفتوحة
-      if (conversation.status === 'closed' && userType === 'customer') {
+      if (conversation.status === 'closed') {
         return res.status(400).json({
           success: false,
           message: 'المحادثة مغلقة، لا يمكن إرسال رسائل جديدة'
@@ -143,7 +143,7 @@ router.post('/',
       }
       // التحقق من أن المحادثة مفتوحة
 
-       if (conversation.status === 'pending' && userType === 'customer') {
+       if (conversation.status === 'pending') {
         return res.status(400).json({
           success: false,
           message: 'يرجى الأنتظار. حتى يقوم الدعم  بقبول محادثتك'

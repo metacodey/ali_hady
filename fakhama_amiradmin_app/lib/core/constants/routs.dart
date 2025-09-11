@@ -1,5 +1,7 @@
 import 'package:fakhama_amiradmin_app/features/auth/screens/login_screen.dart';
 import 'package:fakhama_amiradmin_app/features/clients/screens/add_edit_client.dart';
+import 'package:fakhama_amiradmin_app/features/conversations/screens/chat_screen.dart';
+import 'package:fakhama_amiradmin_app/features/conversations/screens/home_conversations_screen.dart';
 import 'package:fakhama_amiradmin_app/features/orders/screens/add_order_screen.dart';
 import 'package:fakhama_amiradmin_app/features/payments/screens/add_edit_payment_screen.dart';
 import 'package:mc_utils/mc_utils.dart';
@@ -44,5 +46,15 @@ List<GetPage<dynamic>> getPages = [
     name: "/payments/add",
     binding: HomeBinding(),
     page: () => const AddEditPaymentScreen(),
+  ),
+  GetPage(
+    name: "/chat/home",
+    binding: HomeBinding(),
+    page: () => const HomeConversationsScreen(),
+  ),
+  GetPage(
+    name: "/chat/chat",
+    binding: HomeBinding(),
+    page: () => const ChatScreen(),
   ),
 ];

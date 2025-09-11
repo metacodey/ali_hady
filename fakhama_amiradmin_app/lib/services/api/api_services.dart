@@ -69,6 +69,7 @@ class ApiServices {
   // Conversation endpoints
   static String conversationsList = "${server}conversations";
   static String myConversations = "${server}conversations/my";
+  static String customerConversation = "${server}conversations/customer/";
   static String showConversation = "${server}conversations/";
   static String addConversation = "${server}conversations";
   static String assignConversation = "${server}conversations/";
@@ -76,7 +77,6 @@ class ApiServices {
   static String deleteConversation = "${server}conversations/";
   static String conversationsStats = "${server}conversations/dashboard/stats";
 
-  
   // Message endpoints
   static String messagesList = "${server}messages";
   static String conversationMessages = "${server}messages/conversation/";

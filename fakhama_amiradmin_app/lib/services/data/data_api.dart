@@ -494,6 +494,24 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 
+  getCustomerConversation(
+      {required int idCustomer, int page = 1, int limit = 10}) async {
+    Map<String, String> queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+
+    String queryString = queryParams.entries
+        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.customerConversation}$idCustomer?$queryString",
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
   getMyConversations({int page = 1, int limit = 10}) async {
     Map<String, String> queryParams = {
       'page': page.toString(),
@@ -504,10 +522,10 @@ class DataApi {
         .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
         .join('&');
 
-    var res = await apiReq.dynamicData(
-        headers: _headerWithToken() ?? {},
-        url: "${ApiServices.myConversations}?$queryString",
-        method: "GET");
+    var res = await apiReq.fetchJsonData(
+      headers: _headerWithToken() ?? {},
+      url: "${ApiServices.myConversations}?$queryString",
+    );
     return res.fold((lef) => lef, (re) => re);
   }
 
@@ -539,7 +557,7 @@ class DataApi {
 
   updateConversationStatus(
       int conversationId, Map<String, dynamic> data) async {
-    var res = await apiReq.sendJsonData(
+    var res = await apiReq.updateJsonData(
       headers: _headerWithToken() ?? {},
       url: "${ApiServices.updateConversationStatus}$conversationId/status",
       data: data,
@@ -633,4 +651,3 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 }
-

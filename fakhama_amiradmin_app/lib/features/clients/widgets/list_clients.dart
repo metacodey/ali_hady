@@ -32,6 +32,12 @@ class ListClients extends GetView<ClientsController> {
                   onDelete: () {
                     controller.deleteClient(client.id!);
                   },
+                  onChat: () {
+                    Get.toNamed(
+                      '/chat/home',
+                      arguments: client,
+                    );
+                  },
                   onEdit: () {
                     Get.toNamed(
                       '/client/add',

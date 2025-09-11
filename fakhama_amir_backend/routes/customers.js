@@ -23,6 +23,8 @@ router.get('/',
           COALESCE(order_totals.total_amount, 0.00) - COALESCE(payment_totals.total_paid, 0.00) as remaining_amount,
           COALESCE(conversation_totals.total_conversations, 0) as total_conversations,
           COALESCE(conversation_totals.open_conversations, 0) as open_conversations,
+          COALESCE(conversation_totals.pending_conversations, 0) as pending_conversations,
+          COALESCE(conversation_totals.closed_conversations, 0) as closed_conversations,
           COALESCE(conversation_totals.unread_messages_from_customer, 0) as unread_messages_from_customer,
           conversation_totals.last_message_date
         FROM customers c
@@ -47,6 +49,8 @@ router.get('/',
             conv.customer_id,
             COUNT(*) as total_conversations,
             COUNT(CASE WHEN conv.status = 'open' THEN 1 END) as open_conversations,
+            COUNT(CASE WHEN conv.status = 'pending' THEN 1 END) as pending_conversations,
+            COUNT(CASE WHEN conv.status = 'closed' THEN 1 END) as closed_conversations,
             COUNT(CASE WHEN m.sender_type = 'customer' AND m.is_read = 0 THEN 1 END) as unread_messages_from_customer,
             MAX(m.created_at) as last_message_date
           FROM conversations conv
@@ -91,10 +95,13 @@ router.get('/',
         conversations_summary: {
           total_conversations: customer.total_conversations,
           open_conversations: customer.open_conversations,
+          pending_conversations: customer.pending_conversations,
+          closed_conversations: customer.closed_conversations,
           unread_messages_from_customer: customer.unread_messages_from_customer,
           last_message_date: customer.last_message_date,
           has_active_conversations: customer.open_conversations > 0,
-          needs_admin_attention: customer.unread_messages_from_customer > 0
+          has_pending_conversations: customer.pending_conversations > 0,
+          needs_admin_attention: customer.pending_conversations > 0 || customer.unread_messages_from_customer > 0
         }
       }));
       

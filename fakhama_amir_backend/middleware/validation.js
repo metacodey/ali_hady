@@ -217,7 +217,11 @@ const paymentSchemas = {
 const conversationSchemas = {
   create: Joi.object({
     subject: Joi.string().max(200).optional().default('محادثة جديدة')
-  })
+  }),
+  // أضف إلى conversationSchemas
+customerParams: Joi.object({
+  customerId: Joi.number().integer().positive().required()
+})
 };
 
 // Schemas للرسائل
