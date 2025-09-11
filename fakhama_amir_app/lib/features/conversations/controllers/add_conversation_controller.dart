@@ -1,3 +1,4 @@
+import 'package:fakhama_amir_app/core/class/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
 
@@ -5,6 +6,7 @@ import '../../../core/class/statusrequest.dart';
 import '../../../core/constants/utils/widgets/snak_bar.dart';
 import '../../../services/data/data_api.dart';
 import '../../../services/helper_function.dart';
+import '../../../services/socket_service.dart';
 import 'conversation_controller.dart';
 
 class AddConversationController extends GetxController {
@@ -46,6 +48,14 @@ class AddConversationController extends GetxController {
     };
   }
 
+  late SocketService socketService;
+
+  @override
+  void onInit() {
+    super.onInit();
+    socketService = Get.find<SocketService>();
+  }
+
   // حفظ المحادثة الجديدة
   Future<void> saveConversation() async {
     if (!validateConversation()) return;
@@ -59,6 +69,9 @@ class AddConversationController extends GetxController {
         return await dataApi.addConversation(conversationData);
       },
       onSuccess: (res) {
+        // إرسال إشعار Socket للمدير
+        _notifyNewConversation(res['data']);
+
         conversationController.fetchData(hideLoading: true);
         Get.back();
         showSnakBar(
@@ -69,6 +82,24 @@ class AddConversationController extends GetxController {
       },
       onError: showError,
     );
+  }
+
+  // إرسال إشعار المحادثة الجديدة عبر Socket
+  void _notifyNewConversation(dynamic conversationData) {
+    try {
+      var user = Preferences.getDataUser();
+      socketService.createConversation(data: {
+        'conversation': {
+          ...conversationData,
+          ...{'status': 'pending', 'customer_name': user?.fullName ?? ""},
+        },
+        'created_by': 'customer', // نوع المستخدم الذي أنشأ المحادثة
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+      print('📤 New conversation notification sent to admin');
+    } catch (e) {
+      print('Error sending new conversation notification: $e');
+    }
   }
 
   // إعادة تعيين البيانات

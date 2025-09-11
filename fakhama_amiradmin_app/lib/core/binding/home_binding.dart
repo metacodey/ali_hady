@@ -6,6 +6,7 @@ import 'package:fakhama_amiradmin_app/features/orders/controllers/add_edit_order
 import 'package:fakhama_amiradmin_app/features/orders/controllers/orders_controller.dart';
 import 'package:fakhama_amiradmin_app/features/payments/controllers/add_edit_payment_controler.dart';
 import 'package:fakhama_amiradmin_app/features/products/controllers/product_controller.dart';
+import 'package:fakhama_amiradmin_app/services/socket_service.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../features/auth/controllers/login_controller.dart';
 import '../../features/conversations/controllers/conversation_controller.dart';
@@ -34,6 +35,7 @@ class HomeBinding implements Bindings {
     Get.lazyPut(() => AddEditPaymentControler());
     Get.lazyPut(() => ConversationController());
     Get.lazyPut(() => ChatController());
+    Get.lazyPut(() => SocketService());
     // Get.lazyPut(() => PlanController());
 
     // Get.lazyPut(() => JournalController());

@@ -12,7 +12,8 @@ class MessagesList extends GetView<ChatController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.statusRequest.value.isLoading && controller.messages.isEmpty) {
+      if (controller.statusRequest.value.isLoading &&
+          controller.messages.isEmpty) {
         return const Center(
           child: CircularProgressIndicator(
             color: Color(0xFF007AFF),
@@ -20,7 +21,8 @@ class MessagesList extends GetView<ChatController> {
         );
       }
 
-      if (controller.statusRequest.value.isError && controller.messages.isEmpty) {
+      if (controller.statusRequest.value.isError &&
+          controller.messages.isEmpty) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -114,7 +116,9 @@ class MessagesList extends GetView<ChatController> {
             }
 
             final message = controller.messages[messageIndex];
-
+            if (message.isFromUser) {
+              controller.markMessageAsRead(message);
+            }
             return MessageBubble(
               message: message,
               onTap: () {

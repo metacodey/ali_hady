@@ -1,3 +1,4 @@
+import 'package:fakhama_amir_app/services/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../../core/class/statusrequest.dart';
@@ -21,7 +22,7 @@ class ConversationController extends GetxController {
   RxBool hasMoreData = true.obs;
   RxBool isLoadingMore = false.obs;
   RxList<ConversationModel> conversations = RxList<ConversationModel>([]);
-
+  late SocketService socketService;
   // متغيرات البحث والفلترة
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
@@ -32,7 +33,8 @@ class ConversationController extends GetxController {
       <String>['جميع الحالات', 'مفتوحة', 'مغلقة', 'في الانتظار'].obs;
 
   // قائمة المحادثات المفلترة
-  RxList<ConversationModel> filteredConversations = RxList<ConversationModel>([]);
+  RxList<ConversationModel> filteredConversations =
+      RxList<ConversationModel>([]);
 
   // دالة تعيين استعلام البحث
   void setSearchQuery(String query) {
@@ -174,11 +176,92 @@ class ConversationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    socketService = Get.find<SocketService>();
     scroller.addListener(_scrollListener);
     fetchData();
+    _setupSocketListeners();
   }
 
-  // دالة التحديث
+  // إعداد مستمعي Socket
+  void _setupSocketListeners() {
+    socketService.on('new_conversation', (data) {
+      print('📨 New conversation received: $data');
+      _handleNewConversation(data);
+    });
+
+    socketService.on('conversation_status_changed', (data) {
+      print('📋 Conversation status changed: $data');
+      _handleConversationStatusChange(data);
+    });
+  }
+
+  // معالجة المحادثة الجديدة
+  void _handleNewConversation(dynamic data) {
+    try {
+      final conversationData = data['conversation'] ?? data;
+      final newConversation = ConversationModel.fromJson(conversationData);
+
+      // إضافة المحادثة الجديدة في بداية القائمة
+      conversations.insert(0, newConversation);
+
+      // تطبيق الفلاتر
+      _applyFilters();
+
+      // إظهار إشعار للمستخدم
+      Get.snackbar(
+        'محادثة جديدة',
+        'تم إنشاء محادثة جديدة: ${newConversation.subject}',
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+        duration: Duration(seconds: 3),
+      );
+    } catch (e) {
+      print('Error handling new conversation: $e');
+    }
+  }
+
+  // معالجة تغيير حالة المحادثة
+  void _handleConversationStatusChange(dynamic data) {
+    try {
+      final conversationId = data['conversation_id'];
+      final newStatus = data['status'];
+
+      // البحث عن المحادثة وتحديث حالتها
+      final index =
+          conversations.indexWhere((conv) => conv.id == conversationId);
+      if (index != -1) {
+        // تحديث الحالة حسب النوع
+        switch (newStatus) {
+          case 'open':
+            conversations[index] =
+                conversations[index].copyWith(status: 'open');
+            break;
+          case 'closed':
+            conversations[index] =
+                conversations[index].copyWith(status: 'closed');
+            break;
+          case 'pending':
+            conversations[index] =
+                conversations[index].copyWith(status: 'pending');
+            break;
+        }
+        fetchData(hideLoading: true, isRefresh: true);
+      }
+    } catch (e) {
+      print('Error handling conversation status change: $e');
+    }
+  }
+
+  void updateConvCounter(ConversationModel model) {
+    var index = filteredConversations.indexWhere(
+      (element) => element.id == model.id,
+    );
+    if (index > -1) {
+      filteredConversations[index] = model.copyWith(unreadMessages: 0);
+      update();
+    }
+  }
+
   Future<void> refreshData() async {
     await fetchData(isRefresh: true);
   }

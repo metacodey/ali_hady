@@ -3,12 +3,15 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const http = require('http');
 require('dotenv').config();
 
 const { testConnection } = require('./config/database');
+const socketManager = require('./socket');
 
-// إنشاء التطبيق
+// إنشاء التطبيق والخادم
 const app = express();
+const server = http.createServer(app);
 
 // إعدادات الأمان
 app.use(helmet());
@@ -22,7 +25,7 @@ app.use(cors({
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000,
   message: {
     success: false,
     message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً'
@@ -104,9 +107,13 @@ const startServer = async () => {
       process.exit(1);
     }
 
-    app.listen(PORT, () => {
+    // تهيئة Socket.IO
+    socketManager.init(server);
+
+    server.listen(PORT, () => {
       console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
       console.log(`📱 واجهة برمجة التطبيقات: http://localhost:${PORT}/api`);
+      console.log(`🔌 Socket.IO: http://localhost:${PORT}`);
       console.log(`🌍 البيئة: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {

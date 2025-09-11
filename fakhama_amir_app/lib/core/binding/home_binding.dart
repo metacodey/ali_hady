@@ -9,6 +9,7 @@ import '../../features/orders/controllers/order_details_controller.dart';
 import '../../features/orders/controllers/orders_controller.dart';
 import '../../features/payments/controllers/payment_controller.dart';
 import '../../services/api/api_client.dart';
+import '../../services/socket_service.dart';
 
 class HomeBinding implements Bindings {
   @override
@@ -24,7 +25,7 @@ class HomeBinding implements Bindings {
     Get.lazyPut(() => ConversationController());
     Get.lazyPut(() => AddConversationController());
     Get.lazyPut(() => ChatController());
-    // Get.lazyPut(() => AddEditOrdersController());
+    Get.lazyPut(() => SocketService());
 
     // Get.lazyPut(() => PaymentController());
     // Get.lazyPut(() => AddEditPaymentControler());

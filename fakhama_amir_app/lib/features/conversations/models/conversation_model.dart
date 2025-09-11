@@ -11,6 +11,8 @@ class ConversationModel with CustomDropdownListFilter {
   final String customerEmail;
   final String? assignedUser;
   final int unreadMessages;
+  final int userId;
+
   final String lastMessage;
 
   ConversationModel({
@@ -24,11 +26,13 @@ class ConversationModel with CustomDropdownListFilter {
     this.assignedUser,
     required this.unreadMessages,
     required this.lastMessage,
+    this.userId = 1,
   });
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
     return ConversationModel(
       id: int.tryParse(json['id'].toString()) ?? 0,
+      userId: int.tryParse(json['user_id'].toString()) ?? 1,
       subject: json['subject'] ?? '',
       status: json['status'] ?? '',
       createdAt: json['created_at'] != null
@@ -57,6 +61,7 @@ class ConversationModel with CustomDropdownListFilter {
       "assigned_user": assignedUser,
       "unread_messages": unreadMessages,
       "last_message": lastMessage,
+      'user_id': userId
     };
   }
 
@@ -108,19 +113,20 @@ class ConversationModel with CustomDropdownListFilter {
     String? customerEmail,
     String? assignedUser,
     int? unreadMessages,
+    int? userId,
     String? lastMessage,
   }) {
     return ConversationModel(
-      id: id ?? this.id,
-      subject: subject ?? this.subject,
-      status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      customerName: customerName ?? this.customerName,
-      customerEmail: customerEmail ?? this.customerEmail,
-      assignedUser: assignedUser ?? this.assignedUser,
-      unreadMessages: unreadMessages ?? this.unreadMessages,
-      lastMessage: lastMessage ?? this.lastMessage,
-    );
+        id: id ?? this.id,
+        subject: subject ?? this.subject,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        customerName: customerName ?? this.customerName,
+        customerEmail: customerEmail ?? this.customerEmail,
+        assignedUser: assignedUser ?? this.assignedUser,
+        unreadMessages: unreadMessages ?? this.unreadMessages,
+        lastMessage: lastMessage ?? this.lastMessage,
+        userId: userId ?? this.userId);
   }
 }

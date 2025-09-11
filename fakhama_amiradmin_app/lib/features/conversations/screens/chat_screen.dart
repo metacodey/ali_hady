@@ -158,7 +158,7 @@ class ChatScreen extends GetView<ChatController> {
   void _rejectRequest() {
     final conversationId = controller.conversation.value?.id;
     if (conversationId != null) {
-      controller.updateConversationStatus("close");
+      controller.updateConversationStatus("closed");
     }
   }
 

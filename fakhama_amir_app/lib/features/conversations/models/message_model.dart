@@ -4,6 +4,8 @@ class MessageModel {
   final String message;
   final String senderType; // 'customer' or 'user'
   final int? senderId;
+  final int? reciverId;
+
   final bool isRead;
   final DateTime createdAt;
   final String senderName;
@@ -15,6 +17,7 @@ class MessageModel {
     required this.message,
     required this.senderType,
     this.senderId,
+    this.reciverId,
     required this.isRead,
     required this.createdAt,
     required this.senderName,
@@ -27,7 +30,7 @@ class MessageModel {
       conversationId:
           int.tryParse(json['conversation_id']?.toString() ?? '0') ?? 0,
       message: json['message']?.toString() ?? '',
-      senderType: json['sender_type']?.toString() ?? 'customer',
+      senderType: json['sender_type']?.toString() ?? 'user',
       senderId: int.tryParse(json['sender_id']?.toString() ?? ''),
       isRead: int.tryParse(json['is_read'].toString()) == 1 ? true : false,
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
@@ -48,6 +51,7 @@ class MessageModel {
       'created_at': createdAt.toIso8601String(),
       'sender_name': senderName,
       'customer_id': customerId,
+      'reciver_id': reciverId
     };
   }
 
@@ -62,21 +66,22 @@ class MessageModel {
     String? message,
     String? senderType,
     int? senderId,
+    int? reciverId,
     bool? isRead,
     DateTime? createdAt,
     String? senderName,
     int? customerId,
   }) {
     return MessageModel(
-      id: id ?? this.id,
-      conversationId: conversationId ?? this.conversationId,
-      message: message ?? this.message,
-      senderType: senderType ?? this.senderType,
-      senderId: senderId ?? this.senderId,
-      isRead: isRead ?? this.isRead,
-      createdAt: createdAt ?? this.createdAt,
-      senderName: senderName ?? this.senderName,
-      customerId: customerId ?? this.customerId,
-    );
+        id: id ?? this.id,
+        conversationId: conversationId ?? this.conversationId,
+        message: message ?? this.message,
+        senderType: senderType ?? this.senderType,
+        senderId: senderId ?? this.senderId,
+        isRead: isRead ?? this.isRead,
+        createdAt: createdAt ?? this.createdAt,
+        senderName: senderName ?? this.senderName,
+        customerId: customerId ?? this.customerId,
+        reciverId: reciverId ?? this.reciverId);
   }
 }

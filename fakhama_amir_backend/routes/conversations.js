@@ -88,7 +88,7 @@ router.get('/my',
       
       const baseQuery = `
         SELECT 
-          conv.id, conv.subject, conv.status, conv.created_at, conv.updated_at,
+          conv.id, conv.subject, conv.status,conv.user_id, conv.created_at, conv.updated_at,
           u.full_name as assigned_user,
           (
             SELECT COUNT(*) FROM messages m 
@@ -107,7 +107,7 @@ router.get('/my',
       const countQuery = 'SELECT COUNT(*) as total FROM conversations WHERE customer_id = ?';
       
       const result = await getPaginatedData(
-        baseQuery + ' ORDER BY conv.updated_at DESC',
+        baseQuery + ' ORDER BY conv.id DESC',
         countQuery,
         [customerId],
         page,
@@ -390,20 +390,22 @@ router.put('/:id/assign',
 );
 
 // PUT /api/conversations/:id/status - تحديث حالة المحادثة
+// PUT /api/conversations/:id/status - تحديث حالة المحادثة
 router.put('/:id/status',
   verifyToken,
   checkUserType(['user','customer']),
   validateParams(commonSchemas.id),
   validate(require('joi').object({
-    status: require('joi').string().valid('open', 'closed').required()
+    status: require('joi').string().valid('open', 'closed', 'pending').required()
   })),
   async (req, res) => {
     try {
       const { id } = req.validatedParams;
       const { status } = req.validatedData;
+      const { userType, userId } = req.user;
       
       // التحقق من وجود المحادثة
-      const checkQuery = 'SELECT id, subject FROM conversations WHERE id = ?';
+      const checkQuery = 'SELECT id, subject, status, user_id FROM conversations WHERE id = ?';
       const checkResult = await executeQuery(checkQuery, [id]);
       
       if (!checkResult.success || checkResult.data.length === 0) {
@@ -412,10 +414,18 @@ router.put('/:id/status',
           message: 'المحادثة غير موجودة'
         });
       }
+
+      const conversation = checkResult.data[0];
       
       // تحديث حالة المحادثة
       let updateQuery = 'UPDATE conversations SET status = ?, updated_at = NOW()';
       let updateParams = [status];
+      
+      // إذا كان المشرف يقوم بقبول المحادثة (من pending إلى open)
+      if (status === 'open' && userType === 'user' && conversation.status === 'pending') {
+        updateQuery += ', user_id = ?';
+        updateParams.push(userId);
+      }
       
       if (status === 'closed') {
         updateQuery += ', closed_at = NOW()';
@@ -433,11 +443,39 @@ router.put('/:id/status',
         });
       }
       
-      const statusText = status === 'open' ? 'مفتوحة' : 'مغلقة';
+      let statusText;
+      let message;
+      
+      switch(status) {
+        case 'open':
+          statusText = 'مفتوحة';
+          if (conversation.status === 'pending' && userType === 'user') {
+            message = 'تم قبول المحادثة وإسنادها إليك';
+          } else {
+            message = `تم تحديث حالة المحادثة إلى ${statusText}`;
+          }
+          break;
+        case 'closed':
+          statusText = 'مغلقة';
+          message = `تم تحديث حالة المحادثة إلى ${statusText}`;
+          break;
+        case 'pending':
+          statusText = 'معلقة';
+          message = `تم تحديث حالة المحادثة إلى ${statusText}`;
+          break;
+        default:
+          message = 'تم تحديث حالة المحادثة';
+      }
       
       res.json({
         success: true,
-        message: `تم تحديث حالة المحادثة إلى ${statusText}`
+        message: message,
+        data: {
+          conversation_id: id,
+          old_status: conversation.status,
+          new_status: status,
+          assigned_user: status === 'open' && userType === 'user' && conversation.status === 'pending' ? userId : conversation.user_id
+        }
       });
     } catch (error) {
       res.status(500).json({
@@ -448,7 +486,6 @@ router.put('/:id/status',
     }
   }
 );
-
 // DELETE /api/conversations/:id - حذف محادثة
 router.delete('/:id',
   verifyToken,

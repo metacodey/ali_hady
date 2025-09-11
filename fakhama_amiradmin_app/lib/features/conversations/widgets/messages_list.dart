@@ -116,7 +116,9 @@ class MessagesList extends GetView<ChatController> {
             }
 
             final message = controller.messages[messageIndex];
-
+            if (message.isFromCustomer) {
+              controller.markMessageAsRead(message);
+            }
             return MessageBubble(
               message: message,
               onTap: () {

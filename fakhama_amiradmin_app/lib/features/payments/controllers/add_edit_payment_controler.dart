@@ -56,11 +56,12 @@ class AddEditPaymentControler extends GetxController {
           ordersIncomplete.assignAll(data.map(
             (e) => OrderModel.fromJson(e),
           ));
-          OrderModel? order = Get.arguments['order'];
-
-          selectedOrder.value = ordersIncomplete.firstWhereOrNull(
-            (element) => element.id == order?.id,
-          );
+          if (Get.arguments != null) {
+            OrderModel? order = Get.arguments['order'];
+            selectedOrder.value = ordersIncomplete.firstWhereOrNull(
+              (element) => element.id == order?.id,
+            );
+          }
         }
       },
       onError: showError,
@@ -207,9 +208,8 @@ class AddEditPaymentControler extends GetxController {
 
   @override
   void onInit() {
-    getOrdersIncomplete();
-
     super.onInit();
+    getOrdersIncomplete();
   }
 
   @override

@@ -1,4 +1,6 @@
+import 'package:fakhama_amiradmin_app/core/constants/utils/widgets/snak_bar.dart';
 import 'package:fakhama_amiradmin_app/features/auth/models/user_model.dart';
+import 'package:fakhama_amiradmin_app/services/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../../core/class/statusrequest.dart';
@@ -11,7 +13,7 @@ class ConversationController extends GetxController {
   Rx<StatusRequest> statusRequest = StatusRequest.none.obs;
   Rx<StatusRequest> statusLoadMore = StatusRequest.none.obs;
   final ScrollController scroller = ScrollController();
-
+  late SocketService socketService;
   final DataApi dataApi = DataApi(Get.find());
 
   // متغيرات التصفح (Pagination)
@@ -92,14 +94,14 @@ class ConversationController extends GetxController {
       // إعطاء أولوية للمحادثات المفتوحة
       if (a.isOpen && !b.isOpen) return -1;
       if (!a.isOpen && b.isOpen) return 1;
-      
+
       // إذا كانت كلاهما مفتوحة أو غير مفتوحة، ترتيب حسب الحالة
       if (!a.isOpen && !b.isOpen) {
         // المحادثات في الانتظار تأتي قبل المغلقة
         if (a.isPending && !b.isPending) return -1;
         if (!a.isPending && b.isPending) return 1;
       }
-      
+
       // ترتيب حسب آخر تحديث (الأحدث أولاً)
       DateTime aTime = a.updatedAt ?? a.createdAt ?? DateTime.now();
       DateTime bTime = b.updatedAt ?? b.createdAt ?? DateTime.now();
@@ -153,8 +155,8 @@ class ConversationController extends GetxController {
       await handleRequestfunc(
         hideLoading: true,
         status: (status) => statusLoadMore.value = status,
-        apiCall: () async =>
-            await dataApi.getMyConversations(page: currentPage.value + 1),
+        apiCall: () async => await dataApi.getCustomerConversation(
+            idCustomer: customer.value!.id!, page: currentPage.value + 1),
         onSuccess: (res) {
           var data = res['data'] as List?;
           if (data != null) {
@@ -197,9 +199,77 @@ class ConversationController extends GetxController {
   void onInit() {
     super.onInit();
     if (Get.arguments != null && Get.arguments is UserModel) {
+      socketService = Get.find<SocketService>();
       customer.value = Get.arguments;
       scroller.addListener(_scrollListener);
       fetchData();
+      _setupSocketListeners();
+    }
+  }
+
+  // إعداد مستمعي Socket
+  void _setupSocketListeners() {
+    socketService.on('new_conversation', (data) {
+      print('📨 New conversation received: $data');
+      _handleNewConversation(data);
+    });
+
+    socketService.on('conversation_status_changed', (data) {
+      print('📋 Conversation status changed: $data');
+      _handleConversationStatusChange(data);
+    });
+  }
+
+  // معالجة المحادثة الجديدة
+  void _handleNewConversation(dynamic data) {
+    try {
+      final conversationData = data['conversation'] ?? data;
+      final newConversation = ConversationModel.fromJson(conversationData);
+
+      // إضافة المحادثة الجديدة في بداية القائمة
+      conversations.insert(0, newConversation);
+      // تطبيق الفلاتر
+      _applyFilters();
+      // إظهار إشعار للمستخدم
+      showSnakBar(
+        title: 'محادثة جديدة',
+        msg: 'تم إنشاء محادثة جديدة: ${newConversation.subject}',
+        color: Colors.green.withOpacity(0.8),
+      );
+    } catch (e) {
+      print('Error handling new conversation: $e');
+    }
+  }
+
+  // معالجة تغيير حالة المحادثة
+  void _handleConversationStatusChange(dynamic data) {
+    try {
+      final conversationId = data['conversation_id'];
+      final newStatus = data['status'];
+
+      // البحث عن المحادثة وتحديث حالتها
+      final index =
+          conversations.indexWhere((conv) => conv.id == conversationId);
+      if (index != -1) {
+        // تحديث الحالة حسب النوع
+        switch (newStatus) {
+          case 'open':
+            conversations[index] =
+                conversations[index].copyWith(status: 'open');
+            break;
+          case 'closed':
+            conversations[index] =
+                conversations[index].copyWith(status: 'closed');
+            break;
+          case 'pending':
+            conversations[index] =
+                conversations[index].copyWith(status: 'pending');
+            break;
+        }
+        _applyFilters();
+      }
+    } catch (e) {
+      print('Error handling conversation status change: $e');
     }
   }
 
