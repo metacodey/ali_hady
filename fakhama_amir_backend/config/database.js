@@ -1,21 +1,6 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// إعداد اتصال قاعدة البيانات
-// const dbConfig = {
-//   host: process.env.DB_HOST || 'localhost',
-//   port: process.env.DB_PORT || 3306,
-//   user: process.env.DB_USER || 'root',
-//   password: process.env.DB_PASSWORD || '',
-//   database: process.env.DB_NAME || 'fakhama_amir',
-//   charset: 'utf8mb4',
-//   timezone: '+03:00', // توقيت السعودية
-//   connectionLimit: 10,
-//   acquireTimeout: 60000,
-//   timeout: 60000,
-//   reconnect: true
-// };
-// في ملف database.js
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
@@ -27,8 +12,9 @@ const dbConfig = {
   connectionLimit: 10,
   acquireTimeout: 60000,
   timeout: 60000,
-  reconnectOnError: true // بدلاً من reconnect: true
+  reconnectOnError: true
 };
+
 // إنشاء pool للاتصالات
 const pool = mysql.createPool(dbConfig);
 
@@ -50,10 +36,21 @@ const executeQuery = async (query, params = []) => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const [rows, fields] = await connection.execute(query, params);
+    
+    // تأكد من أن جميع المعاملات من النوع الصحيح
+    const sanitizedParams = params.map(param => {
+      if (typeof param === 'string') return param;
+      if (typeof param === 'number') return param;
+      if (param === null || param === undefined) return null;
+      return String(param);
+    });
+    
+    const [rows, fields] = await connection.execute(query, sanitizedParams);
     return { success: true, data: rows, fields };
   } catch (error) {
     console.error('خطأ في تنفيذ الاستعلام:', error.message);
+    console.error('الاستعلام:', query);
+    console.error('المعاملات:', params);
     return { success: false, error: error.message };
   } finally {
     if (connection) connection.release();
@@ -84,41 +81,60 @@ const executeTransaction = async (queries) => {
   }
 };
 
-// دالة للحصول على البيانات مع Pagination
+// دالة pagination محسنة (الحل النهائي)
 const getPaginatedData = async (baseQuery, countQuery, params = [], page = 1, limit = 10) => {
   try {
-    const offset = (page - 1) * limit;
+    // تأكد من أن page و limit هما أرقام صحيحة
+    const actualPage = parseInt(page) || 1;
+    const actualLimit = parseInt(limit) || 10;
+    const offset = (actualPage - 1) * actualLimit;
     
-    // الحصول على العدد الكلي
+    console.log('=== Pagination Debug ===');
+    console.log('Page:', actualPage, 'Limit:', actualLimit, 'Offset:', offset);
+    console.log('Original params:', params);
+    
+    // الحصول على العدد الكلي أولاً
     const countResult = await executeQuery(countQuery, params);
     if (!countResult.success) {
-      throw new Error(countResult.error);
+      throw new Error(`Count query failed: ${countResult.error}`);
     }
     
     const totalItems = countResult.data[0]?.total || 0;
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = Math.ceil(totalItems / actualLimit);
     
-    // الحصول على البيانات مع الحد والإزاحة
-    const dataQuery = `${baseQuery} LIMIT ? OFFSET ?`;
-    const dataResult = await executeQuery(dataQuery, [...params, limit, offset]);
+    console.log('Total items:', totalItems, 'Total pages:', totalPages);
+    
+    // بناء الاستعلام النهائي مع LIMIT و OFFSET
+    // إضافة LIMIT و OFFSET مباشرة إلى الاستعلام بدلاً من استخدام المعاملات
+    const finalQuery = `${baseQuery} LIMIT ${actualLimit} OFFSET ${offset}`;
+    
+    // console.log('Final query:', finalQuery);
+    // console.log('Final params:', params); // نفس المعاملات الأصلية فقط
+    
+    // تنفيذ استعلام البيانات
+    const dataResult = await executeQuery(finalQuery, params);
     
     if (!dataResult.success) {
-      throw new Error(dataResult.error);
+      throw new Error(`Data query failed: ${dataResult.error}`);
     }
+    
+    console.log('Results count:', dataResult.data.length);
+    console.log('=== End Pagination Debug ===');
     
     return {
       success: true,
       data: dataResult.data,
       pagination: {
-        currentPage: page,
+        currentPage: actualPage,
         totalPages,
         totalItems,
-        itemsPerPage: limit,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
+        itemsPerPage: actualLimit,
+        hasNextPage: actualPage < totalPages,
+        hasPrevPage: actualPage > 1
       }
     };
   } catch (error) {
+    console.error('getPaginatedData error:', error.message);
     return { success: false, error: error.message };
   }
 };

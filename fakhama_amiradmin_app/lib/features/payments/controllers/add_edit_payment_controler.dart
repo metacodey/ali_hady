@@ -61,6 +61,7 @@ class AddEditPaymentControler extends GetxController {
             selectedOrder.value = ordersIncomplete.firstWhereOrNull(
               (element) => element.id == order?.id,
             );
+            remainingAmount.value = order?.remainingAmount ?? 0;
           }
         }
       },
@@ -125,9 +126,10 @@ class AddEditPaymentControler extends GetxController {
 
     // في حالة التعديل، نضيف المبلغ السابق للمبلغ المسموح
     if (isEditMode && paymentToEdit != null) {
-      maxAllowedAmount += double.tryParse(paymentToEdit!.amount) ?? 0;
+      maxAllowedAmount += double.tryParse(paymentToEdit?.amount ?? "") ?? 0;
     }
-
+    print(
+        "--------${remainingAmount}-------${paymentToEdit?.amount}----------${amount}");
     if (amount > maxAllowedAmount) {
       showSnakBar(
         title: 'خطأ',
