@@ -60,6 +60,11 @@ class HomeConversationsScreen extends GetView<ConversationController> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: "HomeConversationsScreen",
+        onPressed: () => Get.toNamed('/chat/add'),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

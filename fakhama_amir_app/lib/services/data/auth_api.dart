@@ -16,10 +16,12 @@ class AuthApi {
   customerLogin({
     required String email,
     required String password,
+    String? tokenFirebase,
   }) async {
     var res = await apiReq.sendJsonData(url: ApiServices.customerLogin, data: {
       "email": email,
       "password": password,
+      'tokenFirebase': tokenFirebase
     });
     return res.fold((lef) => lef, (re) => re);
   }

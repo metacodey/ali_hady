@@ -1,10 +1,14 @@
 import 'package:fakhama_amiradmin_app/core/class/statusrequest.dart';
+import 'package:fakhama_amiradmin_app/core/constants/utils/widgets/custom_text_field.dart';
 import 'package:fakhama_amiradmin_app/features/map/controllers/map_app_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mc_utils/mc_utils.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/constants/colors.dart';
 
 class HomeMapScreen extends GetView<MapAppController> {
   const HomeMapScreen({super.key});
@@ -117,6 +121,39 @@ class HomeMapScreen extends GetView<MapAppController> {
                   ),
                 ],
               ),
+              // شريط البحث الجديد
+              Positioned(
+                top: 50,
+                left: 16,
+                right: 16,
+                child: CustomTextField(
+                  controller: controller.searchController,
+                  hintText: 'ابحث عن مستخدم (الاسم، الهاتف، المدينة...)',
+                  // focusNode: controller.searchFocus,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 24.sp,
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                  padding: EdgeInsets.all(12.r),
+                  radius: BorderRadius.circular(8.r),
+                  borderSide: const BorderSide(
+                      color: AppColors.greenBlueVeryLight, width: 2),
+                  keyboardType: TextInputType.text,
+                  suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            controller.searchController.clear();
+                            controller.clearSearch();
+                          },
+                        )
+                      : const SizedBox()),
+                  onChanged: controller.updateSearchQuery,
+                ),
+              ),
+
               // أزرار التحكم في الخريطة
               Positioned(
                 bottom: 50,
@@ -154,9 +191,10 @@ class HomeMapScreen extends GetView<MapAppController> {
                   ],
                 ),
               ),
-              // مؤشر عدد المستخدمين
+
+              // مؤشر عدد المستخدمين مع نتائج البحث
               Positioned(
-                top: 50,
+                top: 110,
                 right: 16,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -164,20 +202,26 @@ class HomeMapScreen extends GetView<MapAppController> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
+                    color: controller.isSearching.value
+                        ? Colors.orange.withOpacity(0.9)
+                        : Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.people,
+                      Icon(
+                        controller.isSearching.value
+                            ? Icons.search
+                            : Icons.people,
                         color: Colors.white,
                         size: 16,
                       ),
                       const SizedBox(width: 4),
                       McText(
-                        txt: '${controller.usersWithLocation.length}',
+                        txt: controller.isSearching.value
+                            ? 'نتائج: ${controller.usersWithLocation.length}'
+                            : '${controller.usersWithLocation.length}',
                         color: Colors.white,
                         fontSize: 14,
                         blod: true,

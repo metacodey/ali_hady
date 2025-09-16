@@ -20,7 +20,7 @@ router.post('/customer/login',
   async (req, res) => {
     try {
       // console.log(req);
-      const { email, password } = req.validatedData;
+      const { email, password ,tokenFirebase} = req.validatedData;
       
       // البحث عن العميل
       const query = `
@@ -66,7 +66,8 @@ router.post('/customer/login',
       }
       
       // تحديث آخر تسجيل دخول
-      await executeQuery('UPDATE customers SET last_login = NOW() WHERE id = ?', [customer.id]);
+      await executeQuery('UPDATE customers SET last_login = NOW(), firebase_token = ? WHERE id = ?', [tokenFirebase,customer.id]);
+      
       
       // توليد التوكن
       const token = generateToken(customer.id, 'customer');

@@ -75,6 +75,8 @@ class ApiServices {
   static String customerConversation = "${server}conversations/customer/";
   static String showConversation = "${server}conversations/";
   static String addConversation = "${server}conversations";
+  static String addConversationByAdmin = "${server}conversations/by_admin";
+
   static String assignConversation = "${server}conversations/";
   static String updateConversationStatus = "${server}conversations/";
   static String deleteConversation = "${server}conversations/";

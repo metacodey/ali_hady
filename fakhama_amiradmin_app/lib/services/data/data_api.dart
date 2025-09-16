@@ -546,6 +546,15 @@ class DataApi {
     return res.fold((lef) => lef, (re) => re);
   }
 
+  addConversationByAdmin(Map<String, dynamic> data) async {
+    var res = await apiReq.sendJsonData(
+      headers: _headerWithToken() ?? {},
+      url: ApiServices.addConversationByAdmin,
+      data: data,
+    );
+    return res.fold((lef) => lef, (re) => re);
+  }
+
   assignConversation(int conversationId, Map<String, dynamic> data) async {
     var res = await apiReq.sendJsonData(
       headers: _headerWithToken() ?? {},

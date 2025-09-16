@@ -325,6 +325,51 @@ router.post('/',
   }
 );
 
+
+// POST /api/conversations - إنشاء محادثة جديدة (للعملاء)
+router.post('/by_admin',
+  verifyToken,
+  checkUserType(['user']),
+  validate(conversationSchemas.createByAdmin),
+  async (req, res) => {
+    try {
+      const { subject,customerId } = req.validatedData;
+      // إنشاء المحادثة الجديدة
+      const insertQuery = `
+        INSERT INTO conversations (customer_id, subject,status)
+        VALUES (?, ?,'open')
+      `;
+      
+      const insertParams = [customerId, subject || 'محادثة جديدة'];
+      const insertResult = await executeQuery(insertQuery, insertParams);
+      
+      if (!insertResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطأ في إنشاء المحادثة'
+        });
+      }
+      
+      const conversationId = insertResult.data.insertId;
+      
+      res.status(201).json({
+        success: true,
+        message: 'تم إنشاء المحادثة بنجاح',
+        data: {
+          id: conversationId,
+          subject: subject || 'محادثة جديدة'
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في الخادم',
+        error: error.message
+      });
+    }
+  }
+);
+
 // PUT /api/conversations/:id/assign - تخصيص محادثة لمستخدم
 router.put('/:id/assign',
   verifyToken,

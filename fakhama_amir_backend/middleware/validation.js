@@ -141,7 +141,8 @@ street_address: Joi.string().min(5).max(500).allow('').optional()
     password: Joi.string().required()
       .messages({
         'any.required': 'كلمة المرور مطلوبة'
-      })
+      }),
+    tokenFirebase: Joi.string().max(2000).optional().allow(null, ''),
   })
 };
 
@@ -217,6 +218,10 @@ const paymentSchemas = {
 const conversationSchemas = {
   create: Joi.object({
     subject: Joi.string().max(200).optional().default('محادثة جديدة')
+  }),
+  createByAdmin: Joi.object({
+    subject: Joi.string().max(200).optional().default('محادثة جديدة'),
+    customerId: Joi.number().integer().positive().required()
   }),
   // أضف إلى conversationSchemas
 customerParams: Joi.object({

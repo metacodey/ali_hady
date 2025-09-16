@@ -74,6 +74,14 @@ class SocketService extends GetxService {
     });
   }
 
+  void createConversation({
+    required Map<String, dynamic> data,
+  }) {
+    if (_socket?.connected == true) {
+      _socket?.emit('new_conversation_created', data);
+    }
+  }
+
   // الانضمام إلى محادثة
   void joinConversation(int conversationId) {
     if (_socket?.connected == true) {

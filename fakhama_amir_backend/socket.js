@@ -68,7 +68,7 @@ class SocketManager {
   // معالجة إنشاء محادثة جديدة
   async handleNewConversationCreated(socket, data) {
     try {
-      const { conversation, created_by } = data;
+      const { conversation, created_by,customer_id } = data;
       console.log('📝 New conversation created:', conversation);
       
       // إشعار جميع المدراء المتصلين
@@ -77,6 +77,16 @@ class SocketManager {
         created_by: created_by,
         timestamp: new Date().toISOString()
       });
+      
+      if(created_by==='user'){  
+         conversation.status='open';
+        this.notifyUser('new_conversation',customer_id,{
+          conversation: conversation,
+          created_by: created_by,
+          timestamp: new Date().toISOString(),
+          status:'open'
+        });
+      }
       
       // تأكيد الإنشاء للعميل
       socket.emit('conversation_created_success', {
@@ -319,7 +329,7 @@ class SocketManager {
   }
 
   // إرسال إشعار لمستخدم محدد
-  notifyUser(userId, event, data) {
+  notifyUser(event,userId, data) {
     const userData = this.connectedUsers.get(userId);
     if (userData) {
       this.io.to(userData.socketId).emit(event, data);

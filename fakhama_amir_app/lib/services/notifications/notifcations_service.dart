@@ -182,6 +182,148 @@ class NotificationService {
       payload: message.data.toString(),
     );
   }
+
+  /// إظهار إشعار محلي لتحديث الموقع
+  Future<void> showLocationUpdateNotification({
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'location_updates_channel',
+      'تحديثات الموقع',
+      channelDescription: 'إشعارات تحديث الموقع في الخلفية',
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+      icon: '@mipmap/ic_launcher',
+      enableVibration: true,
+      playSound: true,
+      ongoing: false,
+    );
+
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.active,
+    );
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: payload,
+    );
+  }
+
+  /// إظهار إشعار محلي بسيط
+  static Future<void> showSimpleNotification({
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'location_updates_channel',
+      'تحديثات الموقع',
+      channelDescription: 'إشعارات تحديث الموقع في الخلفية',
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+      icon: '@mipmap/ic_launcher',
+      enableVibration: true,
+      playSound: true,
+      ongoing: false,
+    );
+
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.active,
+    );
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    await flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: payload,
+    );
+  }
+
+  /// إشعار بنص كبير مخصص أكثر
+  static Future<void> showBigTextNotification({
+    required String title,
+    required String body,
+    required String bigText, // النص الكبير المفصل
+    String? summaryText,
+    String? payload,
+  }) async {
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'location_updates_channel',
+      'تحديثات الموقع',
+      channelDescription: 'إشعارات تحديث الموقع في الخلفية',
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+      icon: '@mipmap/ic_launcher',
+      enableVibration: true,
+      playSound: true,
+      ongoing: false,
+      // تخصيص BigTextStyle بشكل كامل
+      styleInformation: BigTextStyleInformation(
+        bigText, // النص الكبير الذي سيظهر عند توسيع الإشعار
+        htmlFormatBigText: true,
+        contentTitle: title, // العنوان
+        htmlFormatContentTitle: true,
+        summaryText: summaryText, // نص ملخص في الأسفل
+        htmlFormatSummaryText: true,
+      ),
+    );
+
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.active,
+    );
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    await flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: payload,
+    );
+  }
 }
 
 @pragma('vm:entry-point')

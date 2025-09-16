@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mc_utils/mc_utils.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -14,6 +15,7 @@ class MapAppController extends GetxController {
   final DataApi dataApi = DataApi(Get.find());
   RxList<UserModel> clients = RxList<UserModel>([]);
   Rx<Position?> currentPosition = Rx<Position?>(null);
+  final TextEditingController searchController = TextEditingController();
 
   // متغيرات جديدة للخريطة
   Rx<UserModel?> selectedUser = Rx<UserModel?>(null);
@@ -25,23 +27,72 @@ class MapAppController extends GetxController {
   // حالة تحديث الموقع
   RxBool isUpdatingLocation = false.obs;
 
+  // متغيرات البحث الجديدة
+  RxString searchQuery = ''.obs;
+  RxList<UserModel> filteredUsers = RxList<UserModel>([]);
+  RxBool isSearching = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     mapController = MapController();
     getCurrentLocation();
     fetchData();
+
+    // مراقبة تغييرات البحث
+    searchQuery.listen((query) {
+      searchUsers(query);
+    });
   }
 
   // فلترة المستخدمين الذين لديهم إحداثيات
   List<UserModel> get usersWithLocation {
-    return clients
+    List<UserModel> usersToShow =
+        isSearching.value && searchQuery.value.isNotEmpty
+            ? filteredUsers
+            : clients;
+
+    return usersToShow
         .where((user) =>
             user.latitude != null &&
             user.longitude != null &&
             user.latitude != 0 &&
             user.longitude != 0)
         .toList();
+  }
+
+  // دالة البحث
+  void searchUsers(String query) {
+    if (query.isEmpty) {
+      isSearching.value = false;
+      filteredUsers.clear();
+      return;
+    }
+
+    isSearching.value = true;
+
+    filteredUsers.assignAll(
+      clients.where((user) {
+        final searchLower = query.toLowerCase();
+        return user.fullName.toLowerCase().contains(searchLower) ||
+            user.phone.toLowerCase().contains(searchLower) ||
+            (user.city?.toLowerCase().contains(searchLower) ?? false) ||
+            (user.email.toLowerCase().contains(searchLower));
+      }).toList(),
+    );
+  }
+
+  // مسح البحث
+  void clearSearch() {
+    searchQuery.value = '';
+    isSearching.value = false;
+    filteredUsers.clear();
+    searchController.clear();
+  }
+
+  // تحديث نص البحث
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
   }
 
   // اختيار مستخدم وإظهار الشريط السفلي مع الزوم

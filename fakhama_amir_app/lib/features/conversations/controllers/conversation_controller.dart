@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:fakhama_amir_app/services/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
@@ -198,6 +200,7 @@ class ConversationController extends GetxController {
   // معالجة المحادثة الجديدة
   void _handleNewConversation(dynamic data) {
     try {
+      log("--------------------------------${data}");
       final conversationData = data['conversation'] ?? data;
       final newConversation = ConversationModel.fromJson(conversationData);
 

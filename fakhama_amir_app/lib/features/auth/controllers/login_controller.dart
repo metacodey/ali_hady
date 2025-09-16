@@ -1,3 +1,4 @@
+import 'package:fakhama_amir_app/services/notifications/notifcations_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../../core/class/preferences.dart';
@@ -26,16 +27,16 @@ class LoginController extends GetxController {
 
   Future<void> signIn() async {
     if (!formKey.currentState!.validate()) return;
-
+    var tokenFirebase = await NotificationService.getToken();
     await handleRequestfunc(
       status: (status) {
         statusRequest.value = status;
       },
       apiCall: () async {
         return await authApi.customerLogin(
-          email: emailController.text,
-          password: passwordController.text,
-        );
+            email: emailController.text,
+            password: passwordController.text,
+            tokenFirebase: tokenFirebase);
       },
       onSuccess: (res) {
         var data = res['data'];

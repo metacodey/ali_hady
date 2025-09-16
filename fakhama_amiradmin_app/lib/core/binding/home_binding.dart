@@ -1,5 +1,6 @@
 import 'package:fakhama_amiradmin_app/features/clients/controllers/add_edit_client_controller.dart';
 import 'package:fakhama_amiradmin_app/features/clients/controllers/clients_controller.dart';
+import 'package:fakhama_amiradmin_app/features/conversations/controllers/add_conversation_controller.dart';
 import 'package:fakhama_amiradmin_app/features/conversations/controllers/chat_controller.dart';
 import 'package:fakhama_amiradmin_app/features/map/controllers/map_app_controller.dart';
 import 'package:fakhama_amiradmin_app/features/orders/controllers/add_edit_orders_controller.dart';
@@ -36,7 +37,7 @@ class HomeBinding implements Bindings {
     Get.lazyPut(() => ConversationController());
     Get.lazyPut(() => ChatController());
     Get.lazyPut(() => SocketService());
-    // Get.lazyPut(() => PlanController());
+    Get.lazyPut(() => AddConversationController());
 
     // Get.lazyPut(() => JournalController());
     // Get.lazyPut(() => AccountStatementController());
