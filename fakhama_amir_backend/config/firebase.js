@@ -16,12 +16,12 @@ const serviceAccount = {
 };
 
 // تهيئة Firebase Admin
-if (!admin.apps.length) {
+// if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     projectId: process.env.FIREBASE_PROJECT_ID
   });
-}
+// }
 
 /**
  * إرسال إشعار Firebase إلى عميل واحد
