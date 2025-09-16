@@ -3,6 +3,7 @@ const router = express.Router();
 const { executeQuery, getPaginatedData } = require('../config/database');
 const { validate, validateParams, validateQuery, paymentSchemas, commonSchemas } = require('../middleware/validation');
 const { verifyToken, checkUserType } = require('../middleware/auth');
+const { sendPaymentNotification } = require('../config/firebase');
 const Joi = require('joi');
 
 // GET /api/payments - عرض جميع الدفعات (للمشرفين)
@@ -264,9 +265,10 @@ router.post('/',
       
       // التحقق من وجود الطلب
       const orderCheckQuery = `
-        SELECT id, order_number, total_amount, customer_id
-        FROM orders 
-        WHERE id = ?
+        SELECT o.id, o.order_number, o.total_amount, o.customer_id, c.firebase_token, c.full_name
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.id
+        WHERE o.id = ?
       `;
       
       const orderCheckResult = await executeQuery(orderCheckQuery, [order_id]);
@@ -316,11 +318,11 @@ router.post('/',
       
       // إنشاء الدفعة الجديدة
       const insertQuery = `
-        INSERT INTO payments (order_id, amount, payment_method, notes,status)
-        VALUES (?, ?, ?, ?,?)
+        INSERT INTO payments (order_id, amount, payment_method, notes, status)
+        VALUES (?, ?, ?, ?, ?)
       `;
       
-      const insertParams = [order_id, amount, payment_method, notes || null,'paid'];
+      const insertParams = [order_id, amount, payment_method, notes || null, 'paid'];
       const insertResult = await executeQuery(insertQuery, insertParams);
       
       if (!insertResult.success) {
@@ -329,18 +331,52 @@ router.post('/',
           message: 'خطأ في إنشاء الدفعة'
         });
       }
+
+      const paymentId = insertResult.data.insertId;
+      
+      // إرسال إشعار Firebase للعميل
+      console.log('🔔 بدء عملية إرسال إشعار Firebase للعميل...');
+      console.log(`👤 العميل: ${order.full_name} (ID: ${order.customer_id})`);
+      console.log(`💰 الدفعة: ${amount} ريال للطلب ${order.order_number}`);
+      
+      if (order.firebase_token) {
+        try {
+          const notificationData = {
+            paymentId: paymentId,
+            orderNumber: order.order_number,
+            amount: amount,
+            paymentMethod: payment_method
+          };
+          
+          const notificationResult = await sendPaymentNotification(order.firebase_token, notificationData);
+          
+          if (notificationResult.success) {
+            console.log('✅ تم إرسال إشعار Firebase بنجاح للعميل');
+            console.log(`📨 معرف الرسالة: ${notificationResult.messageId}`);
+          } else {
+            console.log('❌ فشل في إرسال إشعار Firebase للعميل');
+            console.log(`🔍 السبب: ${notificationResult.error}`);
+          }
+        } catch (notificationError) {
+          console.error('❌ خطأ غير متوقع في إرسال إشعار Firebase:', notificationError.message);
+        }
+      } else {
+        console.log('⚠️ لا يوجد Firebase token للعميل - لن يتم إرسال إشعار');
+        console.log(`👤 العميل: ${order.full_name} (ID: ${order.customer_id})`);
+      }
       
       res.status(201).json({
         success: true,
         message: 'تم إنشاء الدفعة بنجاح',
         data: {
-          id: insertResult.data.insertId,
+          id: paymentId,
           order_number: order.order_number,
           amount: amount,
           remaining_amount: remainingAmount - amount
         }
       });
     } catch (error) {
+      console.error('❌ خطأ في إنشاء الدفعة:', error.message);
       res.status(500).json({
         success: false,
         message: 'خطأ في الخادم',
