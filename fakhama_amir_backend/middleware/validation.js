@@ -85,11 +85,13 @@ const customerSchemas = {
         'string.min': 'الاسم الكامل يجب أن يكون حرفين على الأقل',
         'any.required': 'الاسم الكامل مطلوب'
       }),
-    phone: Joi.string().pattern(/^\+964[0-9]{9}$/).required()
-      .messages({
-        'string.pattern.base': 'رقم الهاتف يجب أن يبدأ بـ +964 ويتكون من 13 رقم',
-        'any.required': 'رقم الهاتف مطلوب'
-      }),
+  phone: Joi.string()
+    .pattern(/^\+964[0-9]*$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'رقم الهاتف يجب أن يبدأ بـ +964',
+      'any.required': 'رقم الهاتف مطلوب'
+    }),
 city: Joi.string().min(2).max(50).allow('').optional()
   .messages({
     'string.min': 'المدينة يجب أن تحتوي على حرفين على الأقل',
@@ -117,11 +119,7 @@ street_address: Joi.string().min(5).max(500).allow('').optional()
     longitude: Joi.number().min(-180).max(180).optional()
   }),
    updateLocation: Joi.object({
-    city: Joi.string().min(2).max(50).required()
-      .messages({
-        'string.min': 'المدينة يجب أن تحتوي على حرفين على الأقل',
-        'any.required': 'المدينة مطلوبة'
-      }),
+    city: Joi.string().max(2000).optional().allow(null, ''),
     street_address: Joi.string().min(5).max(500).required()
       .messages({
         'string.min': 'العنوان يجب أن يحتوي على 5 أحرف على الأقل',
@@ -142,7 +140,10 @@ street_address: Joi.string().min(5).max(500).allow('').optional()
       .messages({
         'any.required': 'كلمة المرور مطلوبة'
       }),
-    tokenFirebase: Joi.string().max(2000).optional().allow(null, ''),
+    tokenFirebase: Joi.string().allow(null, '').optional()
+      .messages({
+        'string.base': 'رمز Firebase يجب أن يكون نص'
+      })
   })
 };
 
@@ -228,7 +229,6 @@ customerParams: Joi.object({
   customerId: Joi.number().integer().positive().required()
 })
 };
-
 // Schemas للرسائل
 // في messageSchemas أضف هذين
 const messageSchemas = {
