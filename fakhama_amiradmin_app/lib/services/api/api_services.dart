@@ -1,7 +1,9 @@
 class ApiServices {
-  static String server =
-      "https://alamir.fawtrasmart.com/api/"; //"http://192.168.1.71:3000/api/";
-  static String serverSocket = "https://alamir.fawtrasmart.com";
+  static String server = "https://alamir-market.com/api/";
+  // "https://alamir.fawtrasmart.com/api/";
+  //"http://192.168.1.71:3000/api/";
+  static String serverSocket = "https://alamir-market.com";
+  // "https://alamir.fawtrasmart.com";
   //"http://192.168.1.71:3000";
 
   static const headers = {
