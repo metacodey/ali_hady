@@ -1,6 +1,7 @@
 import 'package:fakhama_amir_app/features/conversations/screens/add_conversation_screen.dart';
 import 'package:fakhama_amir_app/features/conversations/screens/chat_screen.dart';
 import 'package:fakhama_amir_app/features/profile/screens/home_profile_screen.dart';
+import 'package:fakhama_amir_app/language/screen/home_language.dart';
 import 'package:mc_utils/mc_utils.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/orders/screens/order_details_screen.dart';
@@ -14,6 +15,12 @@ List<GetPage<dynamic>> getPages = [
       page: () => const HomeScreen(),
       middlewares: [Middlewares()],
       binding: HomeBinding()),
+
+  GetPage(
+    name: "/lang",
+    binding: HomeBinding(),
+    page: () => const HomeLanguage(),
+  ),
   GetPage(
     name: "/login",
     binding: HomeBinding(),

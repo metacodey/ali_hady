@@ -26,7 +26,7 @@ class ListProducts extends GetView<ProductController> {
                 if (index >= products.length) {
                   return const SizedBox.shrink();
                 }
-                var product = controller.products[index];
+                var product = products[index];
                 return ItemProduct(
                   product: product,
                   onDelete: () {
@@ -90,8 +90,10 @@ class ListProducts extends GetView<ProductController> {
             Text('SKU: ${product.sku}'),
             Text('السعر: ${product.price.toStringAsFixed(2)} ر.س'),
             Text('الكمية: ${product.quantity ?? 0}'),
-            if (product.description != null) Text('الوصف: ${product.description}'),
-            if (product.categoryName != null) Text('الفئة: ${product.categoryName}'),
+            if (product.description != null)
+              Text('الوصف: ${product.description}'),
+            if (product.categoryName != null)
+              Text('الفئة: ${product.categoryName}'),
             Text('الحالة: ${product.isActive ? "نشط" : "غير نشط"}'),
           ],
         ),

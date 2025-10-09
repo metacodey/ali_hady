@@ -26,7 +26,7 @@ class ListClients extends GetView<ClientsController> {
                 if (index >= clients.length) {
                   return const SizedBox.shrink();
                 }
-                var client = controller.clients[index];
+                var client = clients[index];
                 return ItemClient(
                   client: client,
                   onDelete: () {

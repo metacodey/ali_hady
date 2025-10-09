@@ -26,7 +26,7 @@ class ListPayments extends GetView<PaymentController> {
                 if (index >= payments.length) {
                   return const SizedBox.shrink();
                 }
-                var payment = controller.filteredPayments[index];
+                var payment = payments[index];
                 return ItemPayment(
                   payment: payment,
                   onTap: () {

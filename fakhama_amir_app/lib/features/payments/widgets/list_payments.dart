@@ -87,7 +87,7 @@ class ListPayments extends GetView<PaymentController> {
           children: [
             Text('رقم الطلب: ${payment.orderNumber}'),
             Text('اسم العميل: ${payment.customerName}'),
-            Text('المبلغ: ${payment.amount} ر.س'),
+            Text('المبلغ: ${payment.amount}'),
             Text('طريقة الدفع: ${payment.paymentMethod}'),
             Text('الحالة: ${payment.statusInArabic}'),
             if (payment.paymentDate != null)

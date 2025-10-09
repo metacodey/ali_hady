@@ -28,7 +28,7 @@ class ListConversations extends GetView<ConversationController> {
                 if (index >= conversations.length) {
                   return const SizedBox.shrink();
                 }
-                var conversation = controller.filteredConversations[index];
+                var conversation = conversations[index];
                 return ItemConversation(
                   conversation: conversation,
                   onTap: () {

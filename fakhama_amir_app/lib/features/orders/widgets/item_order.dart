@@ -110,7 +110,7 @@ class ItemOrder extends GetView<OrdersController> {
                 SizedBox(height: 12.h),
 
                 _buildInfoRow(
-                    Icons.attach_money_outlined,
+                    null,
                     McProcess.formatNumber(
                         order.totalAmount.toStringAsFixed(2))),
                 SizedBox(height: 6.h),
@@ -168,14 +168,15 @@ class ItemOrder extends GetView<OrdersController> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(IconData? icon, String text) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16.sp,
-          color: Colors.grey.shade600,
-        ),
+        if (icon != null)
+          Icon(
+            icon,
+            size: 16.sp,
+            color: Colors.grey.shade600,
+          ),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
@@ -379,7 +380,7 @@ class ItemOrder extends GetView<OrdersController> {
                       ),
                     ),
                     Text(
-                      'متبقي: ${McProcess.formatNumber(order.remainingAmount.toStringAsFixed(2))}',
+                      'متبقي: ${McProcess.formatNumber((order.totalAmount - order.paidAmount).toString())}',
                       style: TextStyle(
                         fontSize: 10.sp,
                         color: Colors.grey.shade600,

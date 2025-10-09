@@ -26,7 +26,7 @@ class ListOrders extends GetView<OrdersController> {
                 if (index >= orders.length) {
                   return const SizedBox.shrink();
                 }
-                var order = controller.orders[index];
+                var order = orders[index];
                 return ItemOrder(
                   order: order,
                   onDelete: () {

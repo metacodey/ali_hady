@@ -114,8 +114,8 @@ class ItemPayment extends StatelessWidget {
                 SizedBox(height: 12.h),
 
                 // Payment Details
-                _buildInfoRow(Icons.attach_money_outlined,
-                    McProcess.formatNumber(payment.amount.toString())),
+                _buildInfoRow(
+                    null, McProcess.formatNumber(payment.amount.toString())),
                 SizedBox(height: 6.h),
                 _buildInfoRow(Icons.payment_outlined,
                     'طريقة الدفع: ${payment.paymentMethod}'),
@@ -167,14 +167,15 @@ class ItemPayment extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(IconData? icon, String text) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16.sp,
-          color: Colors.grey.shade600,
-        ),
+        if (icon != null)
+          Icon(
+            icon,
+            size: 16.sp,
+            color: Colors.grey.shade600,
+          ),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
